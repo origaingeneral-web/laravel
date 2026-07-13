@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { adminNavigation } from '@/config/admin-navigation';
+import { superAdminNavigation, webAdminNavigation } from '@/config/admin-navigation';
 import type { AdminNavGroup, AdminNavItem } from '@/config/admin-navigation';
 import { cn } from '@/lib/utils';
 import type { Auth } from '@/types';
@@ -23,6 +23,11 @@ function canShowItem(item: AdminNavItem, auth: Record<string, unknown>): boolean
     const user = auth.user as Record<string, unknown> | null | undefined;
     const roles = (auth.roles as string[] | undefined) ?? [];
     const permissions = (auth.permissions as string[] | undefined) ?? [];
+    const guard = auth.guard as string | undefined;
+
+    if (item.guard && item.guard !== guard) {
+        return false;
+    }
 
     if (item.role && user?.initial_role !== item.role && !roles.includes(item.role)) {
         return false;
@@ -148,9 +153,11 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
             ? '/admin/dashboard'
             : '/dashboard';
 
+    const navigation = auth.guard === 'super_admin' ? superAdminNavigation : webAdminNavigation;
+
     const groups = useMemo(
-        () => filterGroups(adminNavigation, (props.auth ?? {}) as Record<string, unknown>),
-        [props.auth]
+        () => filterGroups(navigation, (props.auth ?? {}) as Record<string, unknown>),
+        [navigation, props.auth]
     );
 
     return (
@@ -223,20 +230,6 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                         </section>
                     ))}
                 </nav>
-
-                {!collapsed && (
-                    <div className="m-4 rounded-3xl bg-gradient-to-br from-nexlink-primary to-[#3f3ab8] p-4 text-white shadow-xl shadow-nexlink-primary/25">
-                        <p className="text-sm font-black">Upgrade workspace</p>
-                        <p className="mt-1 text-xs text-white/75">Unlock advanced CRM insights and automations.</p>
-                        <Link
-                            href="/settings/profile"
-                            className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-xs font-black text-nexlink-primary transition hover:bg-white/90"
-                            onClick={onClose}
-                        >
-                            Manage plan
-                        </Link>
-                    </div>
-                )}
             </aside>
         </>
     );

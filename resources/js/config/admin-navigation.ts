@@ -13,6 +13,8 @@ export type AdminNavItem = {
     children?: AdminNavItem[];
     permission?: string;
     role?: string;
+    /** When set, item is only shown for this auth guard. */
+    guard?: 'super_admin' | 'web';
 };
 
 export type AdminNavGroup = {
@@ -20,7 +22,8 @@ export type AdminNavGroup = {
     items: AdminNavItem[];
 };
 
-export const adminNavigation: AdminNavGroup[] = [
+/** Super Admin panel navigation (`auth.guard === 'super_admin'`). */
+export const superAdminNavigation: AdminNavGroup[] = [
     {
         title: 'Overview',
         items: [
@@ -29,6 +32,7 @@ export const adminNavigation: AdminNavGroup[] = [
                 href: '/admin/dashboard',
                 icon: LayoutDashboard,
                 active: ['/admin/dashboard'],
+                guard: 'super_admin',
                 permission: 'admin.access',
             },
         ],
@@ -41,8 +45,28 @@ export const adminNavigation: AdminNavGroup[] = [
                 href: '/admin/companies',
                 icon: BriefcaseBusiness,
                 active: ['/admin/companies'],
-                permission: 'company.view',
+                guard: 'super_admin',
+                permission: 'admin.access',
             },
         ],
     },
 ];
+
+/** Web / company-user CRM shell navigation. */
+export const webAdminNavigation: AdminNavGroup[] = [
+    {
+        title: 'Dashboards',
+        items: [
+            {
+                title: 'Overview',
+                href: '/dashboard',
+                icon: LayoutDashboard,
+                active: ['/dashboard'],
+                guard: 'web',
+            },
+        ],
+    },
+];
+
+/** @deprecated Use superAdminNavigation / webAdminNavigation */
+export const adminNavigation = superAdminNavigation;
