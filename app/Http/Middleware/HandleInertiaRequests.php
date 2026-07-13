@@ -36,14 +36,31 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $isSuperAdmin = Auth::guard('super_admin')->check();
+        $user = $isSuperAdmin ? Auth::guard('super_admin')->user() : $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
-                'guard' => Auth::guard('super_admin')->check() ? 'super_admin' : 'web',
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ] : null,
+                'guard' => $isSuperAdmin ? 'super_admin' : 'web',
+                'roles' => $user && method_exists($user, 'getRoleNames')
+                    ? $user->getRoleNames()->values()->all()
+                    : [],
+                'permissions' => $user && method_exists($user, 'getAllPermissions')
+                    ? $user->getAllPermissions()->pluck('name')->values()->all()
+                    : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

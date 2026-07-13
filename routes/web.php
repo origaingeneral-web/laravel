@@ -1,30 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return redirect('login');
 })->name('home');
-
-Route::prefix('nexlink')->name('nexlink.')->group(function () {
-    Route::get('/', function () {
-        return view('nexlink.index');
-    })->name('home');
-
-    Route::get('/{page}', function (string $page) {
-        $page = trim($page, '/');
-        $page = preg_replace('/\.html$/', '', $page);
-
-        abort_unless(preg_match('/^[A-Za-z0-9_\/-]+$/', $page), 404);
-
-        $view = 'nexlink.'.str_replace('/', '.', $page);
-
-        abort_unless(view()->exists($view), 404);
-
-        return view($view);
-    })->where('page', '.*')->name('page');
-});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
@@ -49,5 +29,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('email/read-email', 'email/read-email')->name('email.read');
 });
 
+require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/settings.php';

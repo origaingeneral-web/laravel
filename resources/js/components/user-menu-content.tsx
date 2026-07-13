@@ -53,6 +53,7 @@ export function UserMenuContent({ user }: Props) {
                 <Link
                     className="block w-full cursor-pointer"
                     href={auth.guard === 'super_admin' ? '/admin/logout' : logout()}
+                    method="post"
                     as="button"
                     onClick={handleLogout}
                     data-test="logout-button"

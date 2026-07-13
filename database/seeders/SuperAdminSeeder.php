@@ -2,26 +2,26 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Enums\RoleName;
 use App\Models\SuperAdmin;
-
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 
 class SuperAdminSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed the default Super Admin account.
      */
     public function run(): void
     {
-        SuperAdmin::updateOrCreate(
-            ['email' => 'admin@gmail.com'],
+        $admin = SuperAdmin::query()->updateOrCreate(
+            ['email' => env('SUPER_ADMIN_EMAIL', 'admin@example.com')],
             [
-                'name' => 'Super Admin',
-                'number' => '9876543210',
-                'password' => Hash::make('12345678'),
-            ]
+                'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
+                'number' => env('SUPER_ADMIN_NUMBER', '9999999999'),
+                'password' => env('SUPER_ADMIN_PASSWORD', 'password'),
+            ],
         );
+
+        $admin->assignRole(RoleName::SuperAdmin->value);
     }
 }

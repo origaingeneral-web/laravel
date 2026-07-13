@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { adminNavigation } from '@/config/admin-navigation';
 import type { AdminNavGroup, AdminNavItem } from '@/config/admin-navigation';
@@ -212,12 +212,12 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                 <nav className="custom-scrollbar flex-1 space-y-6 overflow-y-auto px-4 pb-5">
                     {groups.map((group) => (
                         <section key={group.title} className="space-y-2">
-                            <h2 className={cn('px-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400', collapsed && 'sr-only')}>
+                            <h2 className="px-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
                                 {group.title}
                             </h2>
                             <div className="space-y-1">
                                 {group.items.map((item) => (
-                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} collapsed={collapsed} />
+                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} />
                                 ))}
                             </div>
                         </section>

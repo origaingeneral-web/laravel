@@ -2,11 +2,23 @@
 
 namespace App\Providers;
 
+use App\Models\Company;
+use App\Models\User;
+use App\Policies\CompanyPolicy;
+use App\Policies\EmployeePolicy;
+use App\Services\TwoFactorAuthenticationProvider;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Cache\Repository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use PragmaRX\Google2FA\Google2FA;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(TwoFactorAuthenticationProvider::class, function ($app) {
+            return new TwoFactorAuthenticationProvider(
+                $app->make(Google2FA::class),
+                $app->make(Repository::class),
+            );
+        });
     }
 
     /**
@@ -24,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
+        $this->configurePolicies();
     }
 
     /**
@@ -46,5 +65,34 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Configure the rate limiters for authentication.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('login', function (Request $request) {
+            $throttleKey = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
+
+            return Limit::perMinute(5)->by($throttleKey);
+        });
+
+        RateLimiter::for('company-api', function (Request $request) {
+            return Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('two-factor', function (Request $request) {
+            return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+    }
+
+    /**
+     * Register application policies.
+     */
+    protected function configurePolicies(): void
+    {
+        Gate::policy(Company::class, CompanyPolicy::class);
+        Gate::policy(User::class, EmployeePolicy::class);
     }
 }
