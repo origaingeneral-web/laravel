@@ -1,10 +1,25 @@
 import { Head, Link } from '@inertiajs/react';
 import { PencilLine } from 'lucide-react';
+import { useState } from 'react';
+import { MasterRecordForm, type MasterFormValues } from '@/components/admin/master-record-form';
 import { PageHeader } from '@/components/admin/page-header';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
+const defaultValues: MasterFormValues = {
+    name: 'Business Category',
+    code: 'BC-001',
+    type: 'Reference',
+    owner: 'Admin',
+    status: 'Active',
+};
 
 export default function MasterEditPage() {
+    const [form, setForm] = useState<MasterFormValues>(defaultValues);
+
+    const updateForm = (field: keyof MasterFormValues, value: string) => {
+        setForm((current) => ({ ...current, [field]: value }));
+    };
+
     return (
         <>
             <Head title="Edit Master | NexLink" />
@@ -20,24 +35,7 @@ export default function MasterEditPage() {
                 />
 
                 <section className="admin-card space-y-5 p-6">
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Master name</label>
-                            <Input defaultValue="Business Category" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Code</label>
-                            <Input defaultValue="BC-001" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Type</label>
-                            <Input defaultValue="Reference" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Owner</label>
-                            <Input defaultValue="Admin" />
-                        </div>
-                    </div>
+                    <MasterRecordForm values={form} onChange={updateForm} idPrefix="page-edit-master" />
 
                     <div className="flex flex-wrap gap-3">
                         <Button className="rounded-full bg-nexlink-primary text-white hover:bg-nexlink-primary-dark">

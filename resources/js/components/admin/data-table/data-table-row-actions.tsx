@@ -30,12 +30,13 @@ export function DataTableRowActions<T>({ row, actions, rowLabel = 'row' }: DataT
                     <EllipsisVertical className="size-4" aria-hidden="true" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-40 rounded-2xl p-2">
+            <DropdownMenuContent align="end" className="z-[100] min-w-44 rounded-2xl p-2 shadow-lg">
                 {actions.map((action) => {
+                    const isDestructive = action.variant === 'destructive';
                     const content = (
                         <>
                             {action.icon}
-                            {action.label}
+                            <span>{action.label}</span>
                         </>
                     );
 
@@ -50,9 +51,16 @@ export function DataTableRowActions<T>({ row, actions, rowLabel = 'row' }: DataT
                     return (
                         <DropdownMenuItem
                             key={action.id}
-                            variant={action.variant === 'destructive' ? 'destructive' : 'default'}
-                            className="rounded-xl px-3 py-2"
-                            onClick={() => action.onClick?.(row)}
+                            variant={isDestructive ? 'destructive' : 'default'}
+                            className={
+                                isDestructive
+                                    ? 'rounded-xl px-3 py-2 text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-500/10 dark:focus:text-red-300 [&_svg]:text-red-600 dark:[&_svg]:text-red-400'
+                                    : 'rounded-xl px-3 py-2'
+                            }
+                            onSelect={(event) => {
+                                event.preventDefault();
+                                action.onClick?.(row);
+                            }}
                         >
                             {content}
                         </DropdownMenuItem>

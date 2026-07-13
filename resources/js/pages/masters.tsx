@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { Download, FileSpreadsheet, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Pencil, Plus, PlusCircle, PencilLine, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { AdminModal } from '@/components/admin/admin-modal';
 import {
     DataTableCard,
     type DataTableBulkAction,
@@ -10,11 +11,15 @@ import {
     type DataTableMenuOption,
     type DataTableRowAction,
 } from '@/components/admin/data-table';
+import {
+    emptyMasterFormValues,
+    MasterRecordForm,
+    type MasterFormValues,
+    type MasterStatus,
+} from '@/components/admin/master-record-form';
 import { PageHeader } from '@/components/admin/page-header';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-type MasterStatus = 'Active' | 'Draft' | 'Archived';
 
 type MasterRecord = {
     id: number;
@@ -111,10 +116,27 @@ function escapeCsv(value: string | number): string {
     return `"${String(value).replaceAll('"', '""')}"`;
 }
 
+function toFormValues(record: MasterRecord): MasterFormValues {
+    return {
+        name: record.name,
+        code: record.code,
+        type: record.type,
+        owner: record.owner,
+        status: record.status,
+    };
+}
+
 export default function MastersPage() {
     const [rows, setRows] = useState(initialRows);
     const [query, setQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'All' | MasterStatus>('All');
+    const [createOpen, setCreateOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [editingRecord, setEditingRecord] = useState<MasterRecord | null>(null);
+    const [deletingRecord, setDeletingRecord] = useState<MasterRecord | null>(null);
+    const [createForm, setCreateForm] = useState<MasterFormValues>(emptyMasterFormValues);
+    const [editForm, setEditForm] = useState<MasterFormValues>(emptyMasterFormValues);
 
     const filteredRows = useMemo(() => {
         const normalized = query.toLowerCase();
@@ -130,6 +152,46 @@ export default function MastersPage() {
         });
     }, [query, rows, statusFilter]);
 
+    const updateCreateForm = (field: keyof MasterFormValues, value: string) => {
+        setCreateForm((current) => ({ ...current, [field]: value }));
+    };
+
+    const updateEditForm = (field: keyof MasterFormValues, value: string) => {
+        setEditForm((current) => ({ ...current, [field]: value }));
+    };
+
+    const openCreateModal = () => {
+        setCreateForm(emptyMasterFormValues);
+        setCreateOpen(true);
+    };
+
+    const openEditModal = (record: MasterRecord) => {
+        setEditingRecord(record);
+        setEditForm(toFormValues(record));
+        setEditOpen(true);
+    };
+
+    const openDeleteModal = (record: MasterRecord) => {
+        setDeletingRecord(record);
+        setDeleteOpen(true);
+    };
+
+    const closeCreateModal = () => {
+        setCreateOpen(false);
+        setCreateForm(emptyMasterFormValues);
+    };
+
+    const closeEditModal = () => {
+        setEditOpen(false);
+        setEditingRecord(null);
+        setEditForm(emptyMasterFormValues);
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteOpen(false);
+        setDeletingRecord(null);
+    };
+
     const deleteRow = (id: number) => {
         setRows((current) => current.filter((row) => row.id !== id));
     };
@@ -140,6 +202,58 @@ export default function MastersPage() {
 
     const changeSelectedStatus = (status: MasterStatus, selectedIds: Array<string | number>) => {
         setRows((current) => current.map((row) => (selectedIds.includes(row.id) ? { ...row, status } : row)));
+    };
+
+    const saveCreate = () => {
+        const nextId = rows.reduce((max, row) => Math.max(max, row.id), 0) + 1;
+
+        setRows((current) => [
+            {
+                id: nextId,
+                name: createForm.name || 'Untitled master',
+                type: createForm.type || 'Reference',
+                code: createForm.code || `MST-${nextId}`,
+                status: createForm.status,
+                owner: createForm.owner || 'Admin',
+                updatedAt: 'Just now',
+            },
+            ...current,
+        ]);
+
+        closeCreateModal();
+    };
+
+    const saveEdit = () => {
+        if (!editingRecord) {
+            return;
+        }
+
+        setRows((current) =>
+            current.map((row) =>
+                row.id === editingRecord.id
+                    ? {
+                          ...row,
+                          name: editForm.name || row.name,
+                          type: editForm.type || row.type,
+                          code: editForm.code || row.code,
+                          status: editForm.status,
+                          owner: editForm.owner || row.owner,
+                          updatedAt: 'Just now',
+                      }
+                    : row,
+            ),
+        );
+
+        closeEditModal();
+    };
+
+    const confirmDelete = () => {
+        if (!deletingRecord) {
+            return;
+        }
+
+        deleteRow(deletingRecord.id);
+        closeDeleteModal();
     };
 
     const downloadDemoImport = () => {
@@ -315,14 +429,14 @@ export default function MastersPage() {
             id: 'edit',
             label: 'Edit',
             icon: <Pencil className="size-4" aria-hidden="true" />,
-            href: (row) => `/masters/${row.id}/edit`,
+            onClick: openEditModal,
         },
         {
             id: 'delete',
             label: 'Delete',
             icon: <Trash2 className="size-4" aria-hidden="true" />,
             variant: 'destructive',
-            onClick: (row) => deleteRow(row.id),
+            onClick: openDeleteModal,
         },
     ];
 
@@ -338,11 +452,13 @@ export default function MastersPage() {
                             <Button asChild variant="outline" className="rounded-full border-slate-200 bg-white dark:bg-white/5">
                                 <Link href="/dashboard">Back to dashboard</Link>
                             </Button>
-                            <Button asChild className="rounded-full bg-nexlink-primary px-5 text-white hover:bg-nexlink-primary-dark">
-                                <Link href="/masters/create">
-                                    <Plus className="size-4" aria-hidden="true" />
-                                    Create master
-                                </Link>
+                            <Button
+                                type="button"
+                                onClick={openCreateModal}
+                                className="rounded-full bg-nexlink-primary px-5 text-white hover:bg-nexlink-primary-dark"
+                            >
+                                <Plus className="size-4" aria-hidden="true" />
+                                Create master
                             </Button>
                         </>
                     }
@@ -368,6 +484,103 @@ export default function MastersPage() {
                     resetPageOn={[query, statusFilter]}
                 />
             </div>
+
+            <AdminModal
+                open={createOpen}
+                onOpenChange={(open) => (open ? setCreateOpen(true) : closeCreateModal())}
+                title="Create Master"
+                description="Add a new master reference and store it in the shared data catalogue."
+                size="2xl"
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-full border-slate-200 bg-white dark:bg-white/5"
+                            onClick={closeCreateModal}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            className="rounded-full bg-nexlink-primary text-white hover:bg-nexlink-primary-dark"
+                            onClick={saveCreate}
+                        >
+                            <PlusCircle className="size-4" aria-hidden="true" />
+                            Save master
+                        </Button>
+                    </>
+                }
+            >
+                <MasterRecordForm values={createForm} onChange={updateCreateForm} idPrefix="create-master" />
+            </AdminModal>
+
+            <AdminModal
+                open={editOpen}
+                onOpenChange={(open) => (open ? setEditOpen(true) : closeEditModal())}
+                title="Edit Master"
+                description="Update the selected master record and keep your reference catalog in sync."
+                size="2xl"
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-full border-slate-200 bg-white dark:bg-white/5"
+                            onClick={closeEditModal}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            className="rounded-full bg-nexlink-primary text-white hover:bg-nexlink-primary-dark"
+                            onClick={saveEdit}
+                        >
+                            <PencilLine className="size-4" aria-hidden="true" />
+                            Update master
+                        </Button>
+                    </>
+                }
+            >
+                <MasterRecordForm values={editForm} onChange={updateEditForm} idPrefix="edit-master" />
+            </AdminModal>
+
+            <AdminModal
+                open={deleteOpen}
+                onOpenChange={(open) => (open ? setDeleteOpen(true) : closeDeleteModal())}
+                title="Delete master"
+                description={
+                    deletingRecord
+                        ? `Are you sure you want to delete "${deletingRecord.name}"? This action cannot be undone.`
+                        : 'Are you sure you want to delete this master record?'
+                }
+                size="md"
+                footer={
+                    <>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-full border-slate-200 bg-white dark:bg-white/5"
+                            onClick={closeDeleteModal}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            className="rounded-full"
+                            onClick={confirmDelete}
+                        >
+                            <Trash2 className="size-4" aria-hidden="true" />
+                            Delete
+                        </Button>
+                    </>
+                }
+            >
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                    The record will be removed from the table immediately after confirmation.
+                </p>
+            </AdminModal>
         </>
     );
 }

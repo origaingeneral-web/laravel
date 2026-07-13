@@ -1,10 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
+import { useState } from 'react';
+import { emptyMasterFormValues, MasterRecordForm, type MasterFormValues } from '@/components/admin/master-record-form';
 import { PageHeader } from '@/components/admin/page-header';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export default function MasterCreatePage() {
+    const [form, setForm] = useState<MasterFormValues>(emptyMasterFormValues);
+
+    const updateForm = (field: keyof MasterFormValues, value: string) => {
+        setForm((current) => ({ ...current, [field]: value }));
+    };
+
     return (
         <>
             <Head title="Create Master | NexLink" />
@@ -20,24 +27,7 @@ export default function MasterCreatePage() {
                 />
 
                 <section className="admin-card space-y-5 p-6">
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Master name</label>
-                            <Input placeholder="Business category" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Code</label>
-                            <Input placeholder="BC-001" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Type</label>
-                            <Input placeholder="Reference" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Owner</label>
-                            <Input placeholder="Ops Team" />
-                        </div>
-                    </div>
+                    <MasterRecordForm values={form} onChange={updateForm} idPrefix="page-create-master" />
 
                     <div className="flex flex-wrap gap-3">
                         <Button className="rounded-full bg-nexlink-primary text-white hover:bg-nexlink-primary-dark">
