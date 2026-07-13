@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('category');
             $table->timestamps();
         });
-        Schema::create('laguages', function (Blueprint $table) {
+        Schema::create('languages', function (Blueprint $table) {
             $table->id();
             $table->string('language');
             $table->string('code', 5)->nullable();

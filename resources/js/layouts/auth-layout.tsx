@@ -1,4 +1,5 @@
 import AuthLayoutTemplate from '@/layouts/auth/auth-simple-layout';
+import AuthAdminLayoutTemplate from '@/layouts/auth/auth-split-layout';
 
 export default function AuthLayout({
     title = '',

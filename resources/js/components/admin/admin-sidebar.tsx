@@ -1,13 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { adminNavigation } from '@/config/admin-navigation';
 import type { AdminNavGroup, AdminNavItem } from '@/config/admin-navigation';
 import { cn } from '@/lib/utils';
+import type { Auth } from '@/types';
 
 type Props = {
     open: boolean;
+    collapsed: boolean;
     onClose: () => void;
+    onToggleCollapse: () => void;
 };
 
 function isItemActive(item: AdminNavItem, currentUrl: string): boolean {
@@ -50,10 +53,12 @@ function NavItem({
     item,
     currentUrl,
     onNavigate,
+    collapsed,
 }: {
     item: AdminNavItem;
     currentUrl: string;
     onNavigate: () => void;
+    collapsed: boolean;
 }) {
     const active = isItemActive(item, currentUrl);
     const hasChildren = Boolean(item.children?.length);
@@ -67,19 +72,21 @@ function NavItem({
                     type="button"
                     className={cn(
                         'flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition',
+                        collapsed && 'justify-center px-2',
                         active
                             ? 'bg-nexlink-primary/10 text-nexlink-primary dark:bg-white/10 dark:text-white'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
                     )}
                     aria-expanded={expanded}
                     onClick={() => setExpanded((value) => !value)}
+                    title={collapsed ? item.title : undefined}
                 >
                     <Icon className="size-4" aria-hidden="true" />
-                    <span className="flex-1 text-left">{item.title}</span>
-                    <ChevronDown className={cn('size-4 transition-transform', expanded && 'rotate-180')} aria-hidden="true" />
+                    {!collapsed && <span className="flex-1 text-left">{item.title}</span>}
+                    {!collapsed && <ChevronDown className={cn('size-4 transition-transform', expanded && 'rotate-180')} aria-hidden="true" />}
                 </button>
 
-                {expanded && (
+                {!collapsed && expanded && (
                     <div className="mt-1 space-y-1 pl-7">
                         {item.children?.map((child) => {
                             const childActive = isItemActive(child, currentUrl);
@@ -107,29 +114,40 @@ function NavItem({
         );
     }
 
+
     return (
+
         <Link
             href={item.href}
             prefetch
             onClick={onNavigate}
+            title={collapsed ? item.title : undefined}
             className={cn(
                 'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition',
+                collapsed && 'justify-center px-2',
                 active
                     ? 'bg-nexlink-primary text-white shadow-sm shadow-nexlink-primary/25'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
             )}
         >
             <Icon className="size-4" aria-hidden="true" />
-            <span className="flex-1">{item.title}</span>
-            {item.badge && (
+            {!collapsed && <span className="flex-1">{item.title}</span>}
+            {!collapsed && item.badge && (
                 <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold text-current">{item.badge}</span>
             )}
         </Link>
     );
 }
 
-export function AdminSidebar({ open, onClose }: Props) {
+export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
     const { url, props } = usePage();
+    const auth = props.auth as Auth;
+
+    const dashboardUrl =
+        auth.guard === 'super_admin'
+            ? '/admin/dashboard'
+            : '/dashboard';
+
     const groups = useMemo(
         () => filterGroups(adminNavigation, (props.auth ?? {}) as Record<string, unknown>),
         [props.auth]
@@ -148,57 +166,77 @@ export function AdminSidebar({ open, onClose }: Props) {
 
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 flex w-[290px] flex-col border-r border-slate-200/80 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl transition-transform dark:border-white/10 dark:bg-slate-950/95 lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-200/80 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl transition-all duration-200 dark:border-white/10 dark:bg-slate-950/95 lg:translate-x-0',
+                    collapsed ? 'w-[88px]' : 'w-[290px]',
                     open ? 'translate-x-0' : '-translate-x-full'
                 )}
                 aria-label="Admin navigation"
             >
                 <div className="flex h-20 items-center justify-between px-5">
-                    <Link href="/dashboard" prefetch className="flex items-center gap-3" onClick={onClose}>
+                    <Link
+                        href={dashboardUrl}
+                        prefetch
+                        className={cn('flex items-center gap-3', collapsed && 'justify-center')}
+                        onClick={onClose}
+                    >
                         <span className="flex size-11 items-center justify-center rounded-2xl bg-nexlink-primary text-white shadow-lg shadow-nexlink-primary/25">
                             N
                         </span>
-                        <span>
-                            <span className="block text-lg font-black tracking-tight text-slate-950 dark:text-white">NexLink</span>
-                            <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">CRM Admin</span>
-                        </span>
+                        {!collapsed && (
+                            <span>
+                                <span className="block text-lg font-black tracking-tight text-slate-950 dark:text-white">NexLink</span>
+                                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">CRM Admin</span>
+                            </span>
+                        )}
                     </Link>
-                    <button
-                        type="button"
-                        className="rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white lg:hidden"
-                        onClick={onClose}
-                        aria-label="Close sidebar"
-                    >
-                        <X className="size-5" aria-hidden="true" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        {/* <button
+                            type="button"
+                            className="hidden rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white lg:inline-flex"
+                            onClick={onToggleCollapse}
+                            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        >
+                            {collapsed ? <PanelLeftOpen className="size-4" aria-hidden="true" /> : <PanelLeftClose className="size-4" aria-hidden="true" />}
+                        </button> */}
+                        <button
+                            type="button"
+                            className="rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white lg:hidden"
+                            onClick={onClose}
+                            aria-label="Close sidebar"
+                        >
+                            <X className="size-5" aria-hidden="true" />
+                        </button>
+                    </div>
                 </div>
 
                 <nav className="custom-scrollbar flex-1 space-y-6 overflow-y-auto px-4 pb-5">
                     {groups.map((group) => (
                         <section key={group.title} className="space-y-2">
-                            <h2 className="px-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            <h2 className={cn('px-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400', collapsed && 'sr-only')}>
                                 {group.title}
                             </h2>
                             <div className="space-y-1">
                                 {group.items.map((item) => (
-                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} />
+                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} collapsed={collapsed} />
                                 ))}
                             </div>
                         </section>
                     ))}
                 </nav>
 
-                <div className="m-4 rounded-3xl bg-gradient-to-br from-nexlink-primary to-[#3f3ab8] p-4 text-white shadow-xl shadow-nexlink-primary/25">
-                    <p className="text-sm font-black">Upgrade workspace</p>
-                    <p className="mt-1 text-xs text-white/75">Unlock advanced CRM insights and automations.</p>
-                    <Link
-                        href="/settings/profile"
-                        className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-xs font-black text-nexlink-primary transition hover:bg-white/90"
-                        onClick={onClose}
-                    >
-                        Manage plan
-                    </Link>
-                </div>
+                {!collapsed && (
+                    <div className="m-4 rounded-3xl bg-gradient-to-br from-nexlink-primary to-[#3f3ab8] p-4 text-white shadow-xl shadow-nexlink-primary/25">
+                        <p className="text-sm font-black">Upgrade workspace</p>
+                        <p className="mt-1 text-xs text-white/75">Unlock advanced CRM insights and automations.</p>
+                        <Link
+                            href="/settings/profile"
+                            className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-xs font-black text-nexlink-primary transition hover:bg-white/90"
+                            onClick={onClose}
+                        >
+                            Manage plan
+                        </Link>
+                    </div>
+                )}
             </aside>
         </>
     );

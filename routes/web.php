@@ -1,13 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return redirect('login');
 })->name('home');
-Route::get('/super-admin', function () {
-    return redirect('login');
-})->name('super-admin');
 
 Route::prefix('nexlink')->name('nexlink.')->group(function () {
     Route::get('/', function () {
@@ -30,6 +28,9 @@ Route::prefix('nexlink')->name('nexlink.')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::inertia('masters', 'masters')->name('masters');
+    Route::inertia('masters/create', 'masters/create')->name('master.create');
+    Route::inertia('masters/{id}/edit', 'masters/edit')->whereNumber('id')->name('master.edit');
     Route::inertia('tasks', 'tasks')->name('tasks');
     Route::inertia('analytics', 'analytics')->name('analytics');
     Route::inertia('team', 'team')->name('team');
@@ -48,4 +49,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('email/read-email', 'email/read-email')->name('email.read');
 });
 
+require __DIR__.'/admin.php';
 require __DIR__.'/settings.php';

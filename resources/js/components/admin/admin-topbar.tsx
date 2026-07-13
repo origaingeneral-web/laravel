@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, CalendarDays, Menu, Moon, Search, Sun } from 'lucide-react';
+import { Bell, CalendarDays, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -27,6 +27,8 @@ import type { User } from '@/types';
 
 type Props = {
     onMenuClick: () => void;
+    onToggleCollapse: () => void;
+    collapsed: boolean;
 };
 
 const notifications = [
@@ -56,7 +58,7 @@ function getPageTitle(url: string): string {
     return matched?.title ?? 'Dashboard';
 }
 
-export function AdminTopbar({ onMenuClick }: Props) {
+export function AdminTopbar({ onMenuClick, onToggleCollapse, collapsed }: Props) {
     const { props, url } = usePage();
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const getInitials = useInitials();
@@ -76,7 +78,7 @@ export function AdminTopbar({ onMenuClick }: Props) {
 
     return (
         <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-[#f7f7fb]/80 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/80">
-            <div className="flex h-20 items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <div className="flex h-20 items-center gap-3 px-2 sm:px-4 lg:px-6">
                 <button
                     type="button"
                     className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white lg:hidden"
@@ -86,10 +88,19 @@ export function AdminTopbar({ onMenuClick }: Props) {
                     <Menu className="size-5" aria-hidden="true" />
                 </button>
 
-                <div className="min-w-0 flex-1">
+                <button
+                    type="button"
+                    className="hidden rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white lg:inline-flex"
+                    onClick={onToggleCollapse}
+                    aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                >
+                    {collapsed ? <PanelLeftOpen className="size-5" aria-hidden="true" /> : <PanelLeftClose className="size-5" aria-hidden="true" />}
+                </button>
+
+                {/* <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Workspace</p>
                     <h1 className="truncate text-xl font-black text-slate-950 dark:text-white sm:text-2xl">{pageTitle}</h1>
-                </div>
+                </div> */}
 
                 <Dialog>
                     <DialogTrigger asChild>

@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+         $this->call([
+        SuperAdminSeeder::class,
+    ]);
         $now = now();
 
         $businessCategoryId = DB::table('business_categories')->where('category', 'CRM')->value('id')
@@ -94,4 +97,5 @@ class DatabaseSeeder extends Seeder
             'updated_at' => $now,
         ]);
     }
+    
 }
