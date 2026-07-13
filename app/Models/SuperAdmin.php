@@ -4,13 +4,22 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Traits\HasRoles;
 
 class SuperAdmin extends Authenticatable
 {
-    use Notifiable;
+    use HasRoles, Notifiable;
+
     protected $table = 'super_admin';
 
+    /**
+     * The default guard name for Spatie permissions.
+     */
+    protected string $guard_name = 'super_admin';
+
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'email',
@@ -21,14 +30,23 @@ class SuperAdmin extends Authenticatable
         'last_login',
     ];
 
+    /**
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'auth_token',
-    ];  //
-
-    protected $casts = [
-        'password' => 'hashed',
-        'auth_token_expiry' => 'datetime',
-        'last_login' => 'datetime',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+            'auth_token_expiry' => 'datetime',
+            'last_login' => 'datetime',
+        ];
+    }
 }
