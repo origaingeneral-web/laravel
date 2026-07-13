@@ -17,6 +17,10 @@
     --radius-xl: 1.5rem;
 
     --color-primary: var(--primary);
+    --color-nexlink-primary: #5955d1;
+    --color-nexlink-primary-dark: #4540bd;
+    --color-nexlink-body: #f7f7fb;
+    --color-nexlink-card: #ffffff;
     --color-primary-foreground: var(--primary-foreground);
     --color-on-primary: #ffffff;
     --color-primary-container: #052659;
@@ -85,6 +89,8 @@
     --color-surface-variant: #d5e3ff;
 
     --spacing-sidebar-width: 280px;
+    --spacing-admin-sidebar: 290px;
+    --spacing-admin-header: 80px;
     --spacing-container-max: 1440px;
     --spacing-gutter: 24px;
     --spacing-margin-mobile: 16px;
@@ -188,6 +194,25 @@
         background: rgba(13, 28, 48, 0.72);
         border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: var(--spacing-gutter);
+    }
+
+    .admin-card {
+        border-radius: 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .dark .admin-card {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.78);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
     }
 }
 

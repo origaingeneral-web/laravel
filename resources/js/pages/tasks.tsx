@@ -78,6 +78,7 @@ export default function Tasks() {
             (filterAssignee === 'Me Only' && task.assignee === 'David Oshodi') ||
             (filterAssignee === 'Design Team' && task.category === 'Research') ||
             (filterAssignee === 'Dev Team' && (task.category === 'Backend' || task.category === 'Performance'));
+
         return matchesProject && matchesAssignee;
     });
 

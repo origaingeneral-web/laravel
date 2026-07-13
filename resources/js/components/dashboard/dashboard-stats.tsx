@@ -1,4 +1,5 @@
 import { Activity, CheckCircle2, Clock3, Folder } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { LucideIcon } from 'lucide-react';
 
 type StatItem = {
   title: string;

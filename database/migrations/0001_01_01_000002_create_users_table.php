@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('company_id')->nullable()->constrained()->nullOnDelete();
-            $table->unsignedBigInteger('company_id')->index();
+            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
             $table->string('user_prefix', 10)->unique();
             $table->string('group_code', 10)->nullable();
             $table->string('name');
@@ -23,7 +22,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('initial_role', ['admin', 'manager', 'user'])->default('user');
-
 
             $table->unique(['company_id', 'email']);
 
@@ -34,10 +32,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->index();
             $table->unsignedBigInteger('language_id');
-            $table->tinyInteger('dashboard_type', 1)->default(1)->comment('1 for Data Overview,  2 for Charts & Graph');
-            $table->tinyInteger('tracking_type', 1)->default(1)->comment('1 for 24 hours,  2 for Working Hour');
-            $table->tinyInteger('notification_type', 1)->default(2)->comment('1 for 24 hours notification,  2 for working time notification, 3 for no notification');
-            $table->tinyInteger('report_type', 1)->default(1)->comment('1 for working hour base,  2 for attendance base');
+            $table->tinyInteger('dashboard_type')->default(1)->comment('1 for Data Overview,  2 for Charts & Graph');
+            $table->tinyInteger('tracking_type')->default(1)->comment('1 for 24 hours,  2 for Working Hour');
+            $table->tinyInteger('notification_type')->default(2)->comment('1 for 24 hours notification,  2 for working time notification, 3 for no notification');
+            $table->tinyInteger('report_type')->default(1)->comment('1 for working hour base,  2 for attendance base');
 
             $table->timestamps();
         });
@@ -82,6 +80,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('user_details');
+        Schema::dropIfExists('user_preferences');
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');

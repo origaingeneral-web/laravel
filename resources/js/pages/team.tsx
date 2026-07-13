@@ -30,7 +30,10 @@ export default function Team() {
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+
+        if (!newMessage.trim()) {
+            return;
+        }
 
         setMessages((prev) => [
             ...prev,

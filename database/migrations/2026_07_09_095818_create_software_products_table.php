@@ -35,9 +35,9 @@ return new class extends Migration
 
             $table->foreignId('software_product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('module_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('parent_id')->nullable()->constrained('features')->nullOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('module_features')->nullOnDelete();
 
-            $table->foreignId('depends_on_feature_id')->nullable()->constrained('features')->nullOnDelete();
+            $table->foreignId('depends_on_feature_id')->nullable()->constrained('module_features')->nullOnDelete();
 
             $table->string('name');
             $table->string('slug');
@@ -66,6 +66,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('module_features');
+        Schema::dropIfExists('modules');
+        Schema::dropIfExists('software_products');
     }
 };

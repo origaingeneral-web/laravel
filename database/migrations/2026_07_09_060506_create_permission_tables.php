@@ -44,14 +44,14 @@ return new class extends Migration
                 $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
                 $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
             }
-            $table->unsignedBigInteger('company_id')->nullable(); // company wise roles 
+            $table->unsignedBigInteger('company_id')->nullable(); // company wise roles
             $table->string('name');
             $table->string('guard_name');
             $table->timestamps();
             if ($teams || config('permission.testing')) {
                 $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);
             } else {
-                $table->unique(['company_id','name', 'guard_name']);
+                $table->unique(['company_id', 'name', 'guard_name']);
             }
         });
 

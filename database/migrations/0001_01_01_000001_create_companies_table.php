@@ -34,7 +34,6 @@ return new class extends Migration
             $table->string('pincode', 10);
             $table->text('address');
 
-
             // Documents
             $table->string('profile')->nullable(); // need to check if is this required or not
 
@@ -48,7 +47,7 @@ return new class extends Migration
             $table->string('calling_pin', 10)->nullable();
 
             $table->text('remarks')->nullable();
-            $table->tinyInteger('status', 1)->default(1)->comment('1 for active, 0 for inactive, -1 for disabled');
+            $table->tinyInteger('status')->default(1)->comment('1 for active, 0 for inactive, -1 for disabled');
             $table->text('disabled_reason')->nullable();
             $table->date('mail_date')->nullable();
             $table->boolean('terms_accepted')->default(0);
