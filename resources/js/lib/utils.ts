@@ -1,12 +1,12 @@
-import type { InertiaLinkProps } from '@inertiajs/react';
-import { clsx } from 'clsx';
-import type { ClassValue } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
-    return typeof url === 'string' ? url : url.url;
+/**
+ * Merges Tailwind class names, resolving any conflicts.
+ *
+ * @param inputs - An array of class names to merge.
+ * @returns A string of merged and optimized class names.
+ */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }

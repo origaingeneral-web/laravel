@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url';
 import inertia from '@inertiajs/vite';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
@@ -28,4 +29,11 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    resolve: {
+        alias: {
+            'react-router-dom': fileURLToPath(new URL('./resources/js/react-router-dom-adapter.tsx', import.meta.url)),
+            'react-router': fileURLToPath(new URL('./resources/js/react-router-dom-adapter.tsx', import.meta.url)),
+            '@': fileURLToPath(new URL('./resources/js', import.meta.url)),
+        },
+    },
 });

@@ -1,11 +1,14 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { initializeTheme } from '@/hooks/use-appearance';
-import AdminLayout from '@/layouts/admin-layout';
-import AppLayout from '@/layouts/app-layout';
+import * as HelmetAsync from 'react-helmet-async';
+const HelmetProvider = HelmetAsync.HelmetProvider || (HelmetAsync as any).default?.HelmetProvider;
+import { SettingsProvider } from '@/providers/settings-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
+import { I18nProvider } from '@/providers/i18n-provider';
+import { TooltipsProvider } from '@/providers/tooltips-provider';
+import { QueryProvider } from '@/providers/query-provider';
+import Demo1Layout from '@/layouts/demo1/layout';
 import AuthLayout from '@/layouts/auth-layout';
-import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -17,25 +20,30 @@ createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
-            case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
             default:
-                return AdminLayout;
+                return Demo1Layout;
         }
     },
     strictMode: true,
     withApp(app) {
         return (
-            <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
-            </TooltipProvider>
+            <HelmetProvider>
+                <SettingsProvider>
+                    <ThemeProvider>
+                        <I18nProvider>
+                            <TooltipsProvider>
+                                <QueryProvider>
+                                    <Toaster />
+                                    {app}
+                                </QueryProvider>
+                            </TooltipsProvider>
+                        </I18nProvider>
+                    </ThemeProvider>
+                </SettingsProvider>
+            </HelmetProvider>
         );
     },
     progress: {
         color: '#4B5563',
     },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();
