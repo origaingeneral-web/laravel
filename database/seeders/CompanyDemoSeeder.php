@@ -67,19 +67,19 @@ class CompanyDemoSeeder extends Seeder
             ]);
 
         $company = Company::query()->updateOrCreate(
-            ['company_code' => 'TEST'],
+            ['company_code' => 'DEMO'],
             [
                 'business_category_id' => $businessCategoryId,
-                'company_name' => 'Test Company',
-                'email' => 'company@example.com',
+                'company_name' => 'KeenThemes Demo Corp',
+                'email' => 'demo@kt.com',
                 'mobile' => '9999999999',
-                'owner_name' => 'Test Owner',
+                'owner_name' => 'Demo Admin',
                 'owner_mobile' => '9999999998',
                 'country_id' => $countryId,
                 'state_id' => $stateId,
                 'city_id' => $cityId,
                 'pincode' => '400001',
-                'address' => 'Test Address',
+                'address' => 'KeenThemes HQ, Tech Park',
                 'status' => CompanyStatus::Active->value,
                 'terms_accepted' => true,
                 'terms_accepted_at' => $now,
@@ -286,13 +286,13 @@ class CompanyDemoSeeder extends Seeder
         );
 
         $admin = User::query()->updateOrCreate(
-            ['email' => 'company.admin@example.com'],
+            ['email' => 'demo@kt.com'],
             [
                 'company_id' => $company->id,
                 'user_prefix' => 'CMPADMIN',
-                'name' => 'Company Admin',
+                'name' => 'Demo Admin',
                 'email_verified_at' => $now,
-                'password' => 'password',
+                'password' => 'demo123',
                 'initial_role' => 'admin',
                 'is_active' => true,
                 'remember_token' => Str::random(10),

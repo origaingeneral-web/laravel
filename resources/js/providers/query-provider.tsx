@@ -10,11 +10,8 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { toast } from 'sonner';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
-import { ReactQueryTerminal } from '@/components/common/react-query-terminal';
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
-  const [showTanstackDevtools, setShowTanstackDevtools] = useState(false);
-
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -44,16 +41,9 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryTerminal
-        showTanstackDevtools={showTanstackDevtools}
-        toggleTanstackDevtools={() => setShowTanstackDevtools((prev) => !prev)}
-      />
-      {showTanstackDevtools && (
-        <ReactQueryDevtools initialIsOpen={true} buttonPosition="bottom-right" />
-      )}
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
     </QueryClientProvider>
   );
 };
 
 export { QueryProvider };
-

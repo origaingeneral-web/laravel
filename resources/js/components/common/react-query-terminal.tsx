@@ -22,6 +22,7 @@ import {
   Sun,
   Moon,
   PanelLeft,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -133,7 +134,7 @@ export function ReactQueryTerminal({
     }
   }, [isOpen, activeTab]);
 
-  // Global Keyboard Shortcut (Ctrl+Shift+Q or Alt+T)
+  // Global Keyboard Shortcut (Ctrl+Shift+Q or Alt+T) to toggle DevTools directly
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -141,12 +142,16 @@ export function ReactQueryTerminal({
         (e.altKey && e.key.toLowerCase() === 't')
       ) {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (toggleTanstackDevtools) {
+          toggleTanstackDevtools();
+        } else {
+          setIsOpen((prev) => !prev);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [toggleTanstackDevtools]);
 
   const addLog = (
     type: 'input' | 'output' | 'error' | 'system' | 'success',
@@ -356,18 +361,26 @@ export function ReactQueryTerminal({
 
   return (
     <>
-      {/* Sleek Floating CLI Launcher Pill */}
-      <div className="fixed bottom-4 left-4 z-50 flex items-center">
+      {/* Sleek Right-Side Floating Circle Trigger Button - Directly toggles DevTools */}
+      <div className="fixed bottom-5 right-5 z-50 flex items-center">
         <button
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={() => {
+            if (toggleTanstackDevtools) {
+              toggleTanstackDevtools();
+            } else {
+              setIsOpen((prev) => !prev);
+            }
+          }}
+          title="Direct Toggle React Query DevTools (Ctrl+Shift+Q)"
           className={cn(
-            'group relative flex items-center gap-2.5 rounded-full px-4 py-2 text-xs font-mono font-medium shadow-2xl transition-all duration-300',
-            'bg-slate-950/90 text-emerald-400 border border-emerald-500/30 backdrop-blur-xl',
-            'hover:bg-slate-900 hover:border-emerald-400/60 hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:scale-[1.02]',
-            isOpen && 'ring-2 ring-emerald-500/50 border-emerald-400',
+            'group relative flex h-11 w-11 items-center justify-center rounded-full shadow-2xl transition-all duration-300',
+            'bg-slate-950/95 text-emerald-400 border border-emerald-500/40 backdrop-blur-xl',
+            'hover:bg-slate-900 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:scale-110',
+            showTanstackDevtools && 'ring-2 ring-emerald-500/60 border-emerald-400 bg-slate-900',
           )}
         >
-          <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+          {/* Status Indicator Dot */}
+          <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center">
             {stats.fetchingCount > 0 ? (
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
             ) : (
@@ -375,32 +388,13 @@ export function ReactQueryTerminal({
             )}
             <span
               className={cn(
-                'relative inline-flex h-2 w-2 rounded-full',
+                'relative inline-flex h-2.5 w-2.5 rounded-full border border-slate-950',
                 stats.fetchingCount > 0 ? 'bg-amber-400' : 'bg-emerald-400',
               )}
             />
           </span>
 
-          <Terminal className="h-4 w-4 text-emerald-400 group-hover:rotate-6 transition-transform" />
-          <span className="font-semibold tracking-wide">React Query CLI</span>
-
-          <Badge
-            variant="outline"
-            className="ml-1 border-emerald-500/40 bg-emerald-950/80 px-2 py-0.5 text-[10px] text-emerald-300 font-mono"
-          >
-            {stats.fetchingCount > 0 ? (
-              <span className="flex items-center gap-1 text-amber-300">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                {stats.fetchingCount} fetching
-              </span>
-            ) : (
-              `${stats.totalCount} queries`
-            )}
-          </Badge>
-
-          <span className="hidden sm:inline-block ml-1 rounded bg-slate-800/90 px-1.5 py-0.5 text-[10px] text-slate-400 border border-slate-700">
-            Ctrl+Shift+Q
-          </span>
+          <Sparkles className="h-5 w-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
         </button>
       </div>
 
@@ -408,9 +402,9 @@ export function ReactQueryTerminal({
       {isOpen && (
         <div
           className={cn(
-            'fixed bottom-16 left-4 z-50 flex flex-col rounded-2xl border border-slate-800/90 bg-slate-950/95 font-mono shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5',
+            'fixed bottom-18 right-5 z-50 flex flex-col rounded-2xl border border-slate-800/90 bg-slate-950/95 font-mono shadow-[0_20px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5',
             isExpanded
-              ? 'h-[88vh] w-[92vw] left-[4vw]'
+              ? 'h-[88vh] w-[92vw] right-[4vw]'
               : 'h-[500px] w-[94vw] sm:w-[720px]',
           )}
         >
