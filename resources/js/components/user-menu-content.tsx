@@ -9,10 +9,8 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
+import { profile } from '@/routes/account';
 import type { Auth, User } from '@/types';
-
-
 
 type Props = {
     user: User;
@@ -39,7 +37,7 @@ export function UserMenuContent({ user }: Props) {
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
-                        href={edit()}
+                        href={profile()}
                         prefetch
                         onClick={cleanup}
                     >
@@ -52,7 +50,11 @@ export function UserMenuContent({ user }: Props) {
             <DropdownMenuItem asChild>
                 <Link
                     className="block w-full cursor-pointer"
-                    href={auth.guard === 'super_admin' ? '/admin/logout' : logout()}
+                    href={
+                        auth.guard === 'super_admin'
+                            ? '/admin/logout'
+                            : logout()
+                    }
                     method="post"
                     as="button"
                     onClick={handleLogout}

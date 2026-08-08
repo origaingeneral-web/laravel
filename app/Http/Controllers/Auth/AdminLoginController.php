@@ -21,9 +21,13 @@ class AdminLoginController extends Controller
     /**
      * Show the Super Admin login page.
      */
-    public function index(): Response
+    public function index(): Response|RedirectResponse
     {
-        return Inertia::render('auth/admin-login');
+        if (Auth::guard('super_admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return Inertia::render('admin-login');
     }
 
     /**
@@ -31,6 +35,10 @@ class AdminLoginController extends Controller
      */
     public function login(LoginRequest $request): RedirectResponse
     {
+        if (Auth::guard('super_admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $throttleKey = Str::lower($request->string('email')->toString()).'|'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
@@ -74,7 +82,7 @@ class AdminLoginController extends Controller
             'last_login' => now(),
         ]);
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->route('admin.dashboard');
     }
 
     /**

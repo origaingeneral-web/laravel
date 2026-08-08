@@ -19,9 +19,11 @@ class SuperAdminSeeder extends Seeder
                 'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
                 'number' => env('SUPER_ADMIN_NUMBER', '9999999999'),
                 'password' => env('SUPER_ADMIN_PASSWORD', 'password'),
+                'auth_token' => null,
+                'auth_token_expiry' => null,
             ],
         );
 
-        $admin->assignRole(RoleName::SuperAdmin->value);
+        $admin->syncRoles([RoleName::SuperAdmin->value]);
     }
 }

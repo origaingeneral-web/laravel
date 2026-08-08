@@ -19,17 +19,15 @@ export default function AuthLayout({
                     }
                 `}
             </style>
-            <div className="grid lg:grid-cols-2 grow min-h-screen bg-background">
-                <div className="flex justify-center items-center p-8 lg:p-10 order-2 lg:order-1">
+            <div className="grid min-h-screen grow bg-background lg:grid-cols-2">
+                <div className="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
                     <Card className="w-full max-w-[400px]">
-                        <CardContent className="p-6">
-                            {children}
-                        </CardContent>
+                        <CardContent className="p-6">{children}</CardContent>
                     </Card>
                 </div>
 
-                <div className="lg:rounded-xl lg:border lg:border-border lg:m-5 order-1 lg:order-2 bg-top xxl:bg-center xl:bg-cover bg-no-repeat branded-bg min-h-[300px] lg:min-h-0">
-                    <div className="flex flex-col p-8 lg:p-16 gap-4">
+                <div className="xxl:bg-center branded-bg order-1 min-h-[300px] bg-top bg-no-repeat lg:order-2 lg:m-5 lg:min-h-0 lg:rounded-xl lg:border lg:border-border xl:bg-cover">
+                    <div className="flex flex-col gap-4 p-8 lg:p-16">
                         <Link to="/">
                             <img
                                 src={toAbsoluteUrl('/media/app/mini-logo.svg')}
@@ -45,7 +43,7 @@ export default function AuthLayout({
                             <div className="text-base font-medium text-secondary-foreground">
                                 A robust authentication gateway ensuring
                                 <br /> secure&nbsp;
-                                <span className="text-mono font-semibold">
+                                <span className="font-semibold text-mono">
                                     efficient user access
                                 </span>
                                 &nbsp;to the Metronic
