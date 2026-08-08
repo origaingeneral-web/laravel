@@ -1,9 +1,9 @@
-import { Outlet } from 'react-router-dom';
+import { type ReactNode } from 'react';
 
-export function ErrorLayout() {
-  return (
-    <div className="flex flex-col items-center justify-center grow h-[95%]">
-      <Outlet />
-    </div>
-  );
+export default function ErrorLayout({ children }: { children: ReactNode }) {
+    return (
+        <main className="flex min-h-screen grow flex-col items-center justify-center bg-background px-4 py-10">
+            {children}
+        </main>
+    );
 }

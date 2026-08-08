@@ -1,7 +1,8 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import * as HelmetAsync from 'react-helmet-async';
-const HelmetProvider = HelmetAsync.HelmetProvider || (HelmetAsync as any).default?.HelmetProvider;
+const HelmetProvider =
+    HelmetAsync.HelmetProvider || (HelmetAsync as any).default?.HelmetProvider;
 import { SettingsProvider } from '@/providers/settings-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
@@ -9,6 +10,7 @@ import { TooltipsProvider } from '@/providers/tooltips-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import Demo1Layout from '@/layouts/demo1/layout';
 import AuthLayout from '@/layouts/auth-layout';
+import ErrorLayout from '@/layouts/error/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -18,6 +20,8 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
                 return null;
+            case name.startsWith('errors/'):
+                return ErrorLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             default:

@@ -1,7 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, LogOut, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { superAdminNavigation, webAdminNavigation } from '@/config/admin-navigation';
+import { logout } from '@/routes';
 import type { AdminNavGroup, AdminNavItem } from '@/config/admin-navigation';
 import { cn } from '@/lib/utils';
 import type { Auth } from '@/types';
@@ -197,14 +198,6 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                         )}
                     </Link>
                     <div className="flex items-center gap-1">
-                        {/* <button
-                            type="button"
-                            className="hidden rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white lg:inline-flex"
-                            onClick={onToggleCollapse}
-                            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        >
-                            {collapsed ? <PanelLeftOpen className="size-4" aria-hidden="true" /> : <PanelLeftClose className="size-4" aria-hidden="true" />}
-                        </button> */}
                         <button
                             type="button"
                             className="rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white lg:hidden"
@@ -224,12 +217,24 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                             </h2>
                             <div className="space-y-1">
                                 {group.items.map((item) => (
-                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} />
+                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} collapsed={collapsed} />
                                 ))}
                             </div>
                         </section>
                     ))}
                 </nav>
+
+                <div className="sticky bottom-0 border-t border-slate-200/80 bg-white/95 px-4 py-4 dark:border-white/10 dark:bg-slate-950/95">
+                    <Link
+                        href={auth.guard === 'super_admin' ? '/admin/logout' : logout()}
+                        method="post"
+                        as="button"
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 dark:border-slate-700 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-slate-200"
+                    >
+                        <LogOut className="size-4" />
+                        {!collapsed && 'Sign out'}
+                    </Link>
+                </div>
             </aside>
         </>
     );

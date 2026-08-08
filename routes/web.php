@@ -9,6 +9,8 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::inertia('account/home/user-profile', 'account/home/user-profile')
+        ->name('account.profile');
 });
 
 require __DIR__.'/auth.php';

@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MENU_SIDEBAR } from '@/config/menu.config';
@@ -7,70 +8,98 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useSettings } from '@/providers/settings-provider';
 import { Footer } from './components/footer';
 import { Header } from './components/header';
+import { NetworkError } from './components/network-error';
 import { Sidebar } from './components/sidebar';
 
-export default function Demo1Layout({ children }: { children: React.ReactNode }) {
-  const isMobile = useIsMobile();
-  const { pathname } = useLocation();
-  const { getCurrentItem } = useMenu(pathname);
-  const item = getCurrentItem(MENU_SIDEBAR);
-  const { settings, setOption } = useSettings();
+export default function Demo1Layout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const isMobile = useIsMobile();
+    const { pathname } = useLocation();
+    const { getCurrentItem } = useMenu(pathname);
+    const item = getCurrentItem(MENU_SIDEBAR);
+    const { settings, setOption } = useSettings();
+    const [hasNetworkError, setHasNetworkError] = useState(
+        () => typeof navigator !== 'undefined' && !navigator.onLine,
+    );
 
-  useEffect(() => {
-    const bodyClass = document.body.classList;
+    useEffect(() => {
+        const bodyClass = document.body.classList;
 
-    if (settings.layouts.demo1.sidebarCollapse) {
-      bodyClass.add('sidebar-collapse');
-    } else {
-      bodyClass.remove('sidebar-collapse');
-    }
-  }, [settings]); // Runs only on settings update
+        if (settings.layouts.demo1.sidebarCollapse) {
+            bodyClass.add('sidebar-collapse');
+        } else {
+            bodyClass.remove('sidebar-collapse');
+        }
+    }, [settings]); // Runs only on settings update
 
-  useEffect(() => {
-    // Set current layout
-    setOption('layout', 'demo1');
-  }, [setOption]);
+    useEffect(() => {
+        // Set current layout
+        setOption('layout', 'demo1');
+    }, [setOption]);
 
-  useEffect(() => {
-    const bodyClass = document.body.classList;
+    useEffect(() => {
+        const handleOffline = () => setHasNetworkError(true);
+        const handleOnline = () => setHasNetworkError(false);
 
-    // Add a class to the body element
-    bodyClass.add('demo1');
-    bodyClass.add('sidebar-fixed');
-    bodyClass.add('header-fixed');
+        window.addEventListener('offline', handleOffline);
+        window.addEventListener('online', handleOnline);
 
-    const timer = setTimeout(() => {
-      bodyClass.add('layout-initialized');
-    }, 1000); // 1000 milliseconds
+        const removeNetworkErrorListener = router.on('networkError', () => {
+            setHasNetworkError(true);
+        });
 
-    // Remove the class when the component is unmounted
-    return () => {
-      bodyClass.remove('demo1');
-      bodyClass.remove('sidebar-fixed');
-      bodyClass.remove('sidebar-collapse');
-      bodyClass.remove('header-fixed');
-      bodyClass.remove('layout-initialized');
-      clearTimeout(timer);
-    };
-  }, []); // Runs only once on mount
+        return () => {
+            window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('online', handleOnline);
+            removeNetworkErrorListener();
+        };
+    }, []);
 
-  return (
-    <>
-      <Helmet>
-        <title>{item?.title}</title>
-      </Helmet>
+    useEffect(() => {
+        const bodyClass = document.body.classList;
 
-      {!isMobile && <Sidebar />}
+        // Add a class to the body element
+        bodyClass.add('demo1');
+        bodyClass.add('sidebar-fixed');
+        bodyClass.add('header-fixed');
+        bodyClass.add('overflow-x-clip');
 
-      <div className="wrapper flex grow flex-col">
-        <Header />
+        const timer = setTimeout(() => {
+            bodyClass.add('layout-initialized');
+        }, 1000); // 1000 milliseconds
 
-        <main className="grow pt-5" role="content">
-          {children}
-        </main>
+        // Remove the class when the component is unmounted
+        return () => {
+            bodyClass.remove('demo1');
+            bodyClass.remove('sidebar-fixed');
+            bodyClass.remove('sidebar-collapse');
+            bodyClass.remove('header-fixed');
+            bodyClass.remove('overflow-x-clip');
+            bodyClass.remove('layout-initialized');
+            clearTimeout(timer);
+        };
+    }, []); // Runs only once on mount
 
-        <Footer />
-      </div>
-    </>
-  );
+    return (
+        <>
+            <Helmet>
+                <title>{item?.title}</title>
+            </Helmet>
+
+            {!isMobile && <Sidebar />}
+
+            <div className="wrapper flex min-w-0 grow flex-col">
+                <Header />
+
+                <main className="grow pt-5" role="content">
+                    {hasNetworkError ? <NetworkError /> : children}
+                </main>
+
+                <Footer />
+            </div>
+        </>
+    );
 }

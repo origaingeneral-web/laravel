@@ -37,19 +37,6 @@ export const superAdminNavigation: AdminNavGroup[] = [
             },
         ],
     },
-    {
-        title: 'Tenants',
-        items: [
-            {
-                title: 'Companies',
-                href: '/admin/companies',
-                icon: BriefcaseBusiness,
-                active: ['/admin/companies'],
-                guard: 'super_admin',
-                permission: 'admin.access',
-            },
-        ],
-    },
 ];
 
 /** Web / company-user CRM shell navigation. */
