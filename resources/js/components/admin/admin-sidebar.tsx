@@ -96,6 +96,7 @@ function NavItem({
                     <div className="mt-1 space-y-1 pl-7">
                         {item.children?.map((child) => {
                             const childActive = isItemActive(child, currentUrl);
+                            const ChildIcon = child.icon;
 
                             return (
                                 <Link
@@ -104,13 +105,14 @@ function NavItem({
                                     prefetch
                                     onClick={onNavigate}
                                     className={cn(
-                                        'block rounded-xl px-3 py-2 text-sm transition',
+                                        'flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition',
                                         childActive
                                             ? 'bg-nexlink-primary text-white shadow-sm'
                                             : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white'
                                     )}
                                 >
-                                    {child.title}
+                                    {ChildIcon && <ChildIcon className="size-4 shrink-0" aria-hidden="true" />}
+                                    <span>{child.title}</span>
                                 </Link>
                             );
                         })}

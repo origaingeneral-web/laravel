@@ -1,6 +1,13 @@
 import {
     BriefcaseBusiness,
+    Building2,
+    CreditCard,
+    Database,
+    Globe,
+    Languages as LanguagesIcon,
     LayoutDashboard,
+    Map,
+    MapPin,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -37,6 +44,77 @@ export const superAdminNavigation: AdminNavGroup[] = [
             },
         ],
     },
+    {
+        title: 'Master Management',
+        items: [
+            {
+                title: 'Master',
+                href: '/admin/master/business-categories',
+                icon: Database,
+                active: ['/admin/master'],
+                guard: 'super_admin',
+                permission: 'admin.access',
+                children: [
+                    {
+                        title: 'Business Categories',
+                        href: '/admin/master/business-categories',
+                        icon: BriefcaseBusiness,
+                        active: ['/admin/master/business-categories'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Languages',
+                        href: '/admin/master/languages',
+                        icon: LanguagesIcon,
+                        active: ['/admin/master/languages'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Countries',
+                        href: '/admin/master/countries',
+                        icon: Globe,
+                        active: ['/admin/master/countries'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'States',
+                        href: '/admin/master/states',
+                        icon: Map,
+                        active: ['/admin/master/states'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Cities',
+                        href: '/admin/master/cities',
+                        icon: Building2,
+                        active: ['/admin/master/cities'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Areas',
+                        href: '/admin/master/areas',
+                        icon: MapPin,
+                        active: ['/admin/master/areas'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Plans',
+                        href: '/admin/master/plans',
+                        icon: CreditCard,
+                        active: ['/admin/master/plans'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                ],
+            },
+        ],
+    },
 ];
 
 /** Web / company-user CRM shell navigation. */
@@ -57,3 +135,4 @@ export const webAdminNavigation: AdminNavGroup[] = [
 
 /** @deprecated Use superAdminNavigation / webAdminNavigation */
 export const adminNavigation = superAdminNavigation;
+

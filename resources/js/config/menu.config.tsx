@@ -14,6 +14,7 @@ import {
   Code,
   Codepen,
   Coffee,
+  Database,
   File as DocumentIcon,
   Euro,
   Eye,
@@ -62,6 +63,20 @@ export const MENU_SIDEBAR: MenuConfig = [
     children: [
       { title: 'Light Sidebar', path: '/' },
       { title: 'Dark Sidebar', path: '/dark-sidebar' },
+    ],
+  },
+  { heading: 'Master' },
+  {
+    title: 'Master',
+    icon: Database,
+    children: [
+      { title: 'Business Categories', path: '/admin/master/business-categories' },
+      { title: 'Languages', path: '/admin/master/languages' },
+      { title: 'Countries', path: '/admin/master/countries' },
+      { title: 'States', path: '/admin/master/states' },
+      { title: 'Cities', path: '/admin/master/cities' },
+      { title: 'Areas', path: '/admin/master/areas' },
+      { title: 'Plans', path: '/admin/master/plans' },
     ],
   },
   { heading: 'User' },
