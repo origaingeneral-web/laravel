@@ -438,7 +438,7 @@ function CreateRecordModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4">
+            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-xl' : 'sm:max-w-md'}`}>
                 <DialogHeader className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-row items-center gap-3 space-y-0 shadow-xs">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-xs">
                         <FolderPlus className="size-5" />
@@ -1090,14 +1090,14 @@ function EditRecordModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4">
-                <DialogHeader className="p-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white flex flex-row items-center gap-3 space-y-0 shadow-xs">
+            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-xl' : 'sm:max-w-md'}`}>
+                <DialogHeader className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-row items-center gap-3 space-y-0 shadow-xs">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-xs">
                         <SquarePen className="size-5" />
                     </div>
                     <div className="pr-6">
                         <DialogTitle className="text-base font-bold text-white leading-tight">Edit {singularName}</DialogTitle>
-                        <DialogDescription className="text-xs text-amber-100/90 leading-normal">
+                        <DialogDescription className="text-xs text-blue-100/90 leading-normal">
                             Update details for this {singularName.toLowerCase()}.
                         </DialogDescription>
                     </div>

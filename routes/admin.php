@@ -19,6 +19,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
         Route::post('clear-cache', [MasterController::class, 'clearCache'])->name('clear-cache');
 
+        Route::inertia('ai-assistant', 'admin/ai-assistant')->name('ai-assistant');
+
         // Master Routes
         Route::prefix('master')->name('master.')->group(function (): void {
             Route::resource('business-categories', BusinessCategoryController::class)

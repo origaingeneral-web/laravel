@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { AppsDropdownMenu } from '@/partials/topbar/apps-dropdown-menu';
+import { PaletteSheet } from '@/partials/topbar/palette-sheet';
 import { SubscriptionSheet } from '@/partials/topbar/subscription-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { AiIcon } from '@/components/ai-icon';
 import {
     Bell,
     CreditCard,
     LayoutGrid,
     Menu,
+    Palette,
     RefreshCw,
     Search,
     SquareChevronRight,
@@ -137,6 +140,19 @@ export function Header() {
                     >
                         <RefreshCw className="size-4.5!" />
                     </Button>
+                    {/* <PaletteSheet
+                        trigger={
+                            <Button
+                                variant="ghost"
+                                mode="icon"
+                                shape="circle"
+                                className="size-9 hover:bg-purple-500/10 hover:[&_svg]:text-purple-500 text-purple-500/80"
+                                title="Color Palette Themes"
+                            >
+                                <Palette className="size-4.5!" />
+                            </Button>
+                        }
+                    /> */}
                     <SearchDialog
                         trigger={
                             <Button
@@ -186,6 +202,16 @@ export function Header() {
                             </Button>
                         }
                     />
+                    <Button
+                        variant="ghost"
+                        mode="icon"
+                        shape="circle"
+                        className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                        title="Rigel AI"
+                        onClick={() => router.visit('/admin/ai-assistant')}
+                    >
+                        <AiIcon className="size-6!" />
+                    </Button>
                     <UserDropdownMenu
                         trigger={
                             <img

@@ -185,6 +185,15 @@ export function DynamicTable<T extends Record<string, any>>({
         );
     };
 
+    // Toggle all columns
+    const toggleAllColumns = (checked: boolean) => {
+        if (checked) {
+            setHiddenColumns([]);
+        } else {
+            setHiddenColumns(hideableColumns.map(col => col.key));
+        }
+    };
+
     // Export CSV
     const exportCSV = () => {
         const headers = exportableColumns.map((col) => col.header).join(',');
@@ -396,6 +405,19 @@ export function DynamicTable<T extends Record<string, any>>({
                                     Toggle Columns
                                 </div>
                                 <div className="space-y-2">
+                                    <div className="flex items-center gap-2.5 pb-2 mb-2 border-b border-border/40">
+                                        <Checkbox
+                                            id="col-toggle-all"
+                                            checked={hiddenColumns.length === 0}
+                                            onCheckedChange={(checked) => toggleAllColumns(checked as boolean)}
+                                        />
+                                        <Label
+                                            htmlFor="col-toggle-all"
+                                            className="text-xs font-semibold cursor-pointer"
+                                        >
+                                            Toggle All
+                                        </Label>
+                                    </div>
                                     {hideableColumns.map((col) => {
                                         const isChecked = !hiddenColumns.includes(col.key);
                                         return (

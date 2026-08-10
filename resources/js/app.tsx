@@ -12,7 +12,11 @@ import Demo1Layout from '@/layouts/demo1/layout';
 import AuthLayout from '@/layouts/auth-layout';
 import ErrorLayout from '@/layouts/error/layout';
 
+import { initPalette } from '@/config/palette.config';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+initPalette();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
