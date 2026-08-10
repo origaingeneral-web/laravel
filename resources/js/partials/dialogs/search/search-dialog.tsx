@@ -258,16 +258,12 @@ export function SearchDialog({ trigger }: { trigger: ReactNode }) {
           </div>
         </DialogHeader>
         <DialogBody className="p-0 pb-5">
-          <Tabs defaultValue="1">
+          <Tabs defaultValue="quick-menu">
             <TabsList className="justify-between px-5 mb-2.5" variant="line">
               <div className="flex items-center gap-5">
-                <TabsTrigger value="1">Mixed</TabsTrigger>
-                <TabsTrigger value="2">Settings</TabsTrigger>
-                <TabsTrigger value="3">Integrations</TabsTrigger>
-                <TabsTrigger value="4">Users</TabsTrigger>
-                <TabsTrigger value="5">Docs</TabsTrigger>
-                <TabsTrigger value="6">Empty</TabsTrigger>
-                <TabsTrigger value="7">No Results</TabsTrigger>
+                <TabsTrigger value="quick-menu">Quick Menu</TabsTrigger>
+                <TabsTrigger value="menu-shortcuts">Menu Shortcuts</TabsTrigger>
+                <TabsTrigger value="official-menus">Official Menus</TabsTrigger>
               </div>
 
               <DropdownMenu4
@@ -284,30 +280,18 @@ export function SearchDialog({ trigger }: { trigger: ReactNode }) {
               />
             </TabsList>
             <ScrollArea className="h-[480px]">
-              <TabsContent value="1">
+              <TabsContent value="quick-menu">
                 <SearchMixed
                   settings={mixedSettingsItems}
                   integrations={mixedIntegrationsItems}
                   users={mixedUsersItems}
                 />
               </TabsContent>
-              <TabsContent value="2">
+              <TabsContent value="menu-shortcuts">
                 <SearchSettings items={settingsItems} />
               </TabsContent>
-              <TabsContent value="3">
+              <TabsContent value="official-menus">
                 <SearchIntegrations items={integrationsItems} more={true} />
-              </TabsContent>
-              <TabsContent value="4">
-                <SearchUsers items={usersItems} more={true} />
-              </TabsContent>
-              <TabsContent value="5">
-                <SearchDocs items={docsItems} />
-              </TabsContent>
-              <TabsContent value="6">
-                <SearchEmpty />
-              </TabsContent>
-              <TabsContent value="7">
-                <SearchNoResults />
               </TabsContent>
             </ScrollArea>
           </Tabs>

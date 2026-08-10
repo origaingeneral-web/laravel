@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { AppsDropdownMenu } from '@/partials/topbar/apps-dropdown-menu';
-import { ChatSheet } from '@/partials/topbar/chat-sheet';
+import { SubscriptionSheet } from '@/partials/topbar/subscription-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
 import {
     Bell,
+    CreditCard,
     LayoutGrid,
     Menu,
-    MessageCircleMore,
+    RefreshCw,
     Search,
     SquareChevronRight,
 } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import { useLocation } from 'react-router';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/lib/helpers';
@@ -47,6 +49,10 @@ export function Header() {
         setIsSidebarSheetOpen(false);
         setIsMegaMenuSheetOpen(false);
     }, [pathname]);
+
+    const handleClearCache = () => {
+        router.post('/admin/clear-cache');
+    };
 
     return (
         <header
@@ -121,6 +127,16 @@ export function Header() {
 
                 {/* HeaderTopbar */}
                 <div className="ms-auto flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        mode="icon"
+                        shape="circle"
+                        onClick={handleClearCache}
+                        title="Clear Cache"
+                        className="size-9 hover:bg-amber-500/10 hover:[&_svg]:text-amber-500 text-amber-500/80"
+                    >
+                        <RefreshCw className="size-4.5!" />
+                    </Button>
                     <SearchDialog
                         trigger={
                             <Button
@@ -145,15 +161,16 @@ export function Header() {
                             </Button>
                         }
                     />
-                    <ChatSheet
+                    <SubscriptionSheet
                         trigger={
                             <Button
                                 variant="ghost"
                                 mode="icon"
                                 shape="circle"
                                 className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                                title="Plan & Billing"
                             >
-                                <MessageCircleMore className="size-4.5!" />
+                                <CreditCard className="size-4.5!" />
                             </Button>
                         }
                     />

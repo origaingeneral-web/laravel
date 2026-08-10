@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -331,6 +332,19 @@ class MasterController extends Controller
         };
 
         return $request->validate($rules);
+    }
+
+    /**
+     * Clear the application cache.
+     */
+    public function clearCache(): RedirectResponse
+    {
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+
+        return redirect()->back()->with('success', 'Application cache cleared successfully.');
     }
 
     private function entityTitle(string $entity): string

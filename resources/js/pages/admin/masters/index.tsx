@@ -8,6 +8,7 @@ import {
     FolderPlus,
     Loader2,
     Plus,
+    RefreshCw,
     SquarePen,
     Trash2,
     Upload,

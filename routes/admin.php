@@ -17,6 +17,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('auth:super_admin')->group(function (): void {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+        Route::post('clear-cache', [MasterController::class, 'clearCache'])->name('clear-cache');
 
         // Master Routes
         Route::prefix('master')->name('master.')->group(function (): void {

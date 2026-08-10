@@ -55,68 +55,30 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
             <Tabs defaultValue="all" className="w-full relative">
               <TabsList variant="line" className="w-full px-5 mb-5">
                 <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="inbox" className="relative">
-                  Inbox
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 absolute top-1 -end-1" />
+                <TabsTrigger value="request" className="gap-1.5 flex items-center">
+                  Request
+                  <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-blue-600 rounded-full shrink-0">
+                    6
+                  </span>
                 </TabsTrigger>
-                <TabsTrigger value="team">Team</TabsTrigger>
-                <TabsTrigger value="following">Following</TabsTrigger>
-                <div className="grow flex items-center justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        mode="icon"
-                        className="mb-1"
-                      >
-                        <Settings className="size-4.5!" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-44"
-                      side="bottom"
-                      align="end"
-                    >
-                      <DropdownMenuItem asChild>
-                        <Link to="/account/members/teams">
-                          <Users /> Invite Users
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <Settings2 />
-                          <span>Team Settings</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="w-44">
-                            <DropdownMenuItem asChild>
-                              <Link to="/account/members/import-members">
-                                <Shield />
-                                Find Members
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link to="/account/members/import-members">
-                                <Calendar /> Meetings
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link to="/account/members/import-members">
-                                <Shield /> Group Settings
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                      <DropdownMenuItem asChild>
-                        <Link to="/account/security/privacy-settings">
-                          <Shield /> Group Settings
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <TabsTrigger value="report" className="gap-1.5 flex items-center">
+                  Report
+                  <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-blue-600 rounded-full shrink-0">
+                    5
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="logs" className="gap-1.5 flex items-center">
+                  Logs
+                  <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-blue-600 rounded-full shrink-0">
+                    6
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="info" className="gap-1.5 flex items-center">
+                  Info
+                  <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-blue-600 rounded-full shrink-0">
+                    2
+                  </span>
+                </TabsTrigger>
               </TabsList>
 
               {/* All Tab */}
@@ -163,8 +125,8 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                 </div>
               </TabsContent>
 
-              {/* Inbox Tab */}
-              <TabsContent value="inbox" className="mt-0">
+              {/* Request Tab */}
+              <TabsContent value="request" className="mt-0">
                 <div className="flex flex-col gap-5">
                   <Item13 />
                   <div className="border-b border-b-border"></div>
@@ -198,8 +160,8 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                 </div>
               </TabsContent>
 
-              {/* Team Tab */}
-              <TabsContent value="team" className="mt-0">
+              {/* Report Tab */}
+              <TabsContent value="report" className="mt-0">
                 <div className="flex flex-col gap-5">
                   <Item10 />
                   <div className="border-b border-b-border"></div>
@@ -240,8 +202,8 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                 </div>
               </TabsContent>
 
-              {/* Following Tab */}
-              <TabsContent value="following" className="mt-0">
+              {/* Logs Tab */}
+              <TabsContent value="logs" className="mt-0">
                 <div className="flex flex-col gap-5">
                   <Item18 />
                   <div className="border-b border-b-border"></div>
@@ -272,6 +234,15 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                     date="4 days ago"
                     info="Dev Team"
                   />
+                </div>
+              </TabsContent>
+
+              {/* Info Tab */}
+              <TabsContent value="info" className="mt-0">
+                <div className="flex flex-col gap-5">
+                  <Item11 />
+                  <div className="border-b border-b-border"></div>
+                  <Item14 />
                 </div>
               </TabsContent>
             </Tabs>
