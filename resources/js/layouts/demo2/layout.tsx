@@ -47,7 +47,7 @@ export function Demo2Layout() {
       <Helmet>
         <title>{item?.title}</title>
       </Helmet>
-      <div className="flex grow flex-col in-data-[sticky-header=on]:pt-(--header-height-default)">
+      <div className="flex min-h-screen grow flex-col in-data-[sticky-header=on]:pt-(--header-height-default)">
         <Header />
 
         <Navbar />

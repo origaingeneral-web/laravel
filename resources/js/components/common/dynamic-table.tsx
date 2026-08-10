@@ -7,8 +7,10 @@ import {
     Copy,
     Download,
     Eye,
+    FileCode,
     FileSpreadsheet,
     FileText,
+    Printer,
     Search,
     X,
 } from 'lucide-react';
@@ -97,6 +99,12 @@ export function DynamicTable<T extends Record<string, any>>({
         [columns, hiddenColumns]
     );
 
+    // Exportable Columns (excludes actions column)
+    const exportableColumns = useMemo(
+        () => visibleColumns.filter((col) => col.key !== 'actions'),
+        [visibleColumns]
+    );
+
     // Hideable Columns
     const hideableColumns = useMemo(
         () => columns.filter((col) => col.hideable !== false),
@@ -179,10 +187,10 @@ export function DynamicTable<T extends Record<string, any>>({
 
     // Export CSV
     const exportCSV = () => {
-        const headers = visibleColumns.map((col) => col.header).join(',');
+        const headers = exportableColumns.map((col) => col.header).join(',');
         const rows = sortedData.map((item) =>
-            visibleColumns
-                ? visibleColumns
+            exportableColumns
+                ? exportableColumns
                       .map((col) => {
                           const val = item[col.key] ?? '';
                           return `"${String(val).replace(/"/g, '""')}"`;
@@ -199,6 +207,107 @@ export function DynamicTable<T extends Record<string, any>>({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    // Export Excel (.xls HTML Spreadsheet)
+    const exportExcel = () => {
+        const headers = exportableColumns.map((col) => `<th style="background-color: #3b82f6; color: #ffffff; font-weight: bold; padding: 8px; border: 1px solid #d1d5db;">${col.header}</th>`).join('');
+        const rows = sortedData
+            .map(
+                (item, idx) =>
+                    `<tr>${exportableColumns
+                        .map((col) => {
+                            let val = col.key === 'id' ? idx + 1 : (item[col.key] ?? '');
+                            if (typeof val === 'boolean') val = val ? 'Yes' : 'No';
+                            return `<td style="padding: 8px; border: 1px solid #d1d5db;">${String(val).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
+                        })
+                        .join('')}</tr>`
+            )
+            .join('');
+
+        const excelContent = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="utf-8" />
+                <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${exportFilename}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+                <style>
+                    table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 13px; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <thead><tr>${headers}</tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${exportFilename}.xls`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    // Print & PDF Export
+    const handlePrint = (isPdf = false) => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const headers = exportableColumns
+            .map((col) => `<th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left; background-color: #f1f5f9; font-weight: 600;">${col.header}</th>`)
+            .join('');
+
+        const rows = sortedData
+            .map(
+                (item, idx) =>
+                    `<tr style="border-bottom: 1px solid #e2e8f0;">${exportableColumns
+                        .map((col) => {
+                            let val = col.key === 'id' ? idx + 1 : (item[col.key] ?? '');
+                            if (typeof val === 'boolean') val = val ? 'Yes' : 'No';
+                            return `<td style="border: 1px solid #e2e8f0; padding: 8px;">${String(val)}</td>`;
+                        })
+                        .join('')}</tr>`
+            )
+            .join('');
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${title || exportFilename}</title>
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px; color: #0f172a; }
+                    h1 { font-size: 20px; margin-bottom: 4px; font-weight: 700; }
+                    p { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+                    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>${title || exportFilename.toUpperCase()}</h1>
+                <p>Export Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} | Total Records: ${sortedData.length}</p>
+                <table>
+                    <thead><tr>${headers}</tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        ${isPdf ? '' : 'window.close();'}
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     };
 
     // Export JSON
@@ -318,20 +427,32 @@ export function DynamicTable<T extends Record<string, any>>({
                                 Export
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuLabel>Export Data</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel>Export & Options</DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={exportExcel} className="gap-2 cursor-pointer">
+                                <FileSpreadsheet className="size-4 text-emerald-600 dark:text-emerald-400" />
+                                Export Excel (.xls)
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={exportCSV} className="gap-2 cursor-pointer">
-                                <FileSpreadsheet className="size-4" />
+                                <FileSpreadsheet className="size-4 text-blue-600 dark:text-blue-400" />
                                 Export CSV
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handlePrint(true)} className="gap-2 cursor-pointer">
+                                <FileCode className="size-4 text-rose-600 dark:text-rose-400" />
+                                Export PDF
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={exportJSON} className="gap-2 cursor-pointer">
-                                <FileText className="size-4" />
+                                <FileText className="size-4 text-amber-600 dark:text-amber-400" />
                                 Export JSON
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handlePrint(false)} className="gap-2 cursor-pointer">
+                                <Printer className="size-4 text-slate-600 dark:text-slate-400" />
+                                Print Table
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={copyToClipboard} className="gap-2 cursor-pointer">
-                                <Copy className="size-4" />
+                                <Copy className="size-4 text-purple-600 dark:text-purple-400" />
                                 {copied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
                             </DropdownMenuItem>
                         </DropdownMenuContent>

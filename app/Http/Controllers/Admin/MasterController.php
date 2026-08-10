@@ -60,6 +60,131 @@ class MasterController extends Controller
     }
 
     /**
+     * Bulk import master records.
+     */
+    public function import(Request $request, string $entity): RedirectResponse
+    {
+        $this->assertValidEntity($entity);
+
+        $request->validate([
+            'rows' => ['required', 'array', 'min:1'],
+        ]);
+
+        $rows = $request->input('rows');
+        $insertData = [];
+
+        $countries = DB::table('countries')->pluck('id', 'country')->toArray();
+        $states = DB::table('states')->pluck('id', 'state')->toArray();
+        $cities = DB::table('cities')->pluck('id', 'city')->toArray();
+
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $record = null;
+
+            switch ($entity) {
+                case 'states':
+                    $countryId = $row['country_id'] ?? null;
+                    if (! $countryId && ! empty($row['country'])) {
+                        $countryName = trim($row['country']);
+                        $countryId = $countries[$countryName] ?? null;
+                    }
+                    if ($countryId && ! empty($row['state'])) {
+                        $record = [
+                            'country_id' => (int) $countryId,
+                            'state' => trim($row['state']),
+                            'code' => ! empty($row['code']) ? trim($row['code']) : null,
+                        ];
+                    }
+                    break;
+
+                case 'cities':
+                    $stateId = $row['state_id'] ?? null;
+                    if (! $stateId && ! empty($row['state'])) {
+                        $stateName = trim($row['state']);
+                        $stateId = $states[$stateName] ?? null;
+                    }
+                    if ($stateId && ! empty($row['city'])) {
+                        $record = [
+                            'state_id' => (int) $stateId,
+                            'city' => trim($row['city']),
+                            'is_top_city' => filter_var($row['is_top_city'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                        ];
+                    }
+                    break;
+
+                case 'areas':
+                    $cityId = $row['city_id'] ?? null;
+                    if (! $cityId && ! empty($row['city'])) {
+                        $cityName = trim($row['city']);
+                        $cityId = $cities[$cityName] ?? null;
+                    }
+                    if ($cityId && ! empty($row['area'])) {
+                        $record = [
+                            'city_id' => (int) $cityId,
+                            'area' => trim($row['area']),
+                            'zipcode' => ! empty($row['zipcode']) ? trim($row['zipcode']) : null,
+                        ];
+                    }
+                    break;
+
+                case 'languages':
+                    if (! empty($row['language'])) {
+                        $record = [
+                            'language' => trim($row['language']),
+                            'code' => ! empty($row['code']) ? trim($row['code']) : null,
+                        ];
+                    }
+                    break;
+
+                case 'countries':
+                    if (! empty($row['country'])) {
+                        $record = [
+                            'country' => trim($row['country']),
+                            'iso3' => ! empty($row['iso3']) ? trim($row['iso3']) : null,
+                            'phone_code' => ! empty($row['phone_code']) ? trim($row['phone_code']) : null,
+                        ];
+                    }
+                    break;
+
+                case 'plans':
+                    if (! empty($row['plan_name'])) {
+                        $record = [
+                            'plan_name' => trim($row['plan_name']),
+                            'price' => (float) ($row['price'] ?? 0),
+                            'duration_in_days' => (int) ($row['duration_in_days'] ?? 30),
+                            'staff_limit' => (int) ($row['staff_limit'] ?? 10),
+                            'tracking_duration' => (int) ($row['tracking_duration'] ?? 90),
+                            'remarks' => ! empty($row['remarks']) ? trim($row['remarks']) : null,
+                        ];
+                    }
+                    break;
+
+                case 'business-categories':
+                    if (! empty($row['category'])) {
+                        $record = [
+                            'category' => trim($row['category']),
+                        ];
+                    }
+                    break;
+            }
+
+            if ($record !== null) {
+                $insertData[] = $record;
+            }
+        }
+
+        if (! empty($insertData)) {
+            DB::table($this->tableFor($entity))->insert($insertData);
+        }
+
+        return redirect()->route('admin.master.index', ['entity' => $entity])
+            ->with('success', count($insertData).' '.$this->entityTitle($entity).' record(s) imported successfully.');
+    }
+
+    /**
      * Update an existing master record.
      */
     public function update(Request $request, string $entity, int $id): RedirectResponse
@@ -142,17 +267,17 @@ class MasterController extends Controller
                 ->orderBy('country')
                 ->get(),
             'states' => DB::table('states')
-                ->select(['states.id', 'states.state', 'states.code', 'countries.country as country'])
+                ->select(['states.id', 'states.state', 'states.code', 'states.country_id', 'countries.country as country'])
                 ->join('countries', 'states.country_id', '=', 'countries.id')
                 ->orderBy('states.state')
                 ->get(),
             'cities' => DB::table('cities')
-                ->select(['cities.id', 'cities.city', 'cities.is_top_city', 'states.state as state'])
+                ->select(['cities.id', 'cities.city', 'cities.is_top_city', 'cities.state_id', 'states.state as state'])
                 ->join('states', 'cities.state_id', '=', 'states.id')
                 ->orderBy('cities.city')
                 ->get(),
             'areas' => DB::table('areas')
-                ->select(['areas.id', 'areas.area', 'areas.zipcode', 'cities.city as city'])
+                ->select(['areas.id', 'areas.area', 'areas.zipcode', 'areas.city_id', 'cities.city as city'])
                 ->join('cities', 'areas.city_id', '=', 'cities.id')
                 ->orderBy('areas.area')
                 ->get(),

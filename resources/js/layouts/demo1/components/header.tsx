@@ -51,8 +51,7 @@ export function Header() {
     return (
         <header
             className={cn(
-                'header fixed start-0 end-0 top-0 z-10 flex shrink-0 items-stretch border-b border-transparent bg-background pe-[var(--removed-body-scroll-bar-size,0px)]',
-                headerSticky && 'border-b border-border',
+                'header fixed start-0 end-0 top-0 z-10 flex shrink-0 items-stretch border-b border-border bg-background pe-[var(--removed-body-scroll-bar-size,0px)]',
             )}
         >
             <Container className="flex items-stretch justify-between lg:gap-4">
