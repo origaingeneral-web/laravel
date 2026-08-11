@@ -99,3 +99,5 @@ Route::middleware('auth:sanctum')->group(function () {
             });
         });
 });
+
+include __DIR__.'/admin/master.php';

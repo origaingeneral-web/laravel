@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\RoleName;
+use App\Models\Admin\Master\Plan;
 use App\Models\Company;
 use App\Models\CompanyProduct;
 use App\Models\CompanyProductCredit;
 use App\Models\CompanyProductCreditLog;
 use App\Models\Feature;
-use App\Models\Plan;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProductAccess;

@@ -1,4 +1,5 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import {
     AlertCircle,
     CheckCircle2,
@@ -77,11 +78,50 @@ const entityDescriptions: Record<string, string> = {
 
 export default function MasterIndex() {
     const { props } = usePage();
-    const { entity, items, lookups } = props as unknown as {
+    const { entity } = props as unknown as {
         entity: string;
-        items: MasterRecord[];
-        lookups: Lookups;
     };
+
+    const [items, setItems] = useState<MasterRecord[]>([]);
+    const [lookups, setLookups] = useState<Lookups>({});
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Artificial delay to test Shimmer UI
+            const res = await fetch(`/api/v1/admin/master/${entity}`);
+            const data = await res.json();
+            if (data.data) {
+                setItems(data.data);
+            }
+            
+            const neededLookups: Lookups = {};
+            if (entity === 'states') {
+                const cRes = await fetch('/api/v1/admin/master/countries');
+                const cData = await cRes.json();
+                neededLookups.countries = cData.data;
+            } else if (entity === 'cities') {
+                const sRes = await fetch('/api/v1/admin/master/states');
+                const sData = await sRes.json();
+                neededLookups.states = sData.data;
+            } else if (entity === 'areas') {
+                const ciRes = await fetch('/api/v1/admin/master/cities');
+                const ciData = await ciRes.json();
+                neededLookups.cities = ciData.data;
+            }
+            setLookups(neededLookups);
+            
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [entity]);
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
@@ -331,6 +371,7 @@ export default function MasterIndex() {
                     searchPlaceholder={`Search ${title.toLowerCase()}...`}
                     exportFilename={entity}
                     defaultPageSize={5}
+                    isLoading={isLoading}
                 />
             </Container>
 
@@ -338,6 +379,7 @@ export default function MasterIndex() {
                 entity={entity}
                 isOpen={isCreateOpen}
                 onClose={() => setIsCreateOpen(false)}
+                    onSuccess={fetchData}
                 lookups={lookups}
             />
 
@@ -345,6 +387,7 @@ export default function MasterIndex() {
                 entity={entity}
                 isOpen={isImportOpen}
                 onClose={() => setIsImportOpen(false)}
+                    onSuccess={fetchData}
                 lookups={lookups}
                 items={items}
             />
@@ -355,6 +398,7 @@ export default function MasterIndex() {
                     record={editingRecord}
                     isOpen={Boolean(editingRecord)}
                     onClose={() => setEditingRecord(null)}
+                    onSuccess={fetchData}
                     lookups={lookups}
                 />
             )}
@@ -365,6 +409,7 @@ export default function MasterIndex() {
                     record={deletingRecord}
                     isOpen={Boolean(deletingRecord)}
                     onClose={() => setDeletingRecord(null)}
+                    onSuccess={fetchData}
                 />
             )}
         </>
@@ -376,10 +421,12 @@ function CreateRecordModal({
     isOpen,
     onClose,
     lookups,
+    onSuccess,
 }: {
     entity: string;
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
     lookups: Lookups;
 }) {
     const singularName = entitySingular[entity] || 'Record';
@@ -424,16 +471,36 @@ function CreateRecordModal({
         }
     };
 
-    const { data, setData, post, processing, errors, reset } = useForm<Record<string, any>>(getInitialFormData());
+    const [data, setData] = useState<Record<string, any>>(getInitialFormData());
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        post(`/admin/master/${entity}`, {
-            onSuccess: () => {
-                reset();
+        setProcessing(true);
+        setErrors({});
+        try {
+            const res = await fetch(`/api/v1/admin/master/${entity}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                setData(getInitialFormData());
+                onSuccess();
                 onClose();
-            },
-        });
+            } else if (res.status === 422) {
+                const errData = await res.json();
+                setErrors(errData.errors || {});
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -1015,11 +1082,13 @@ function EditRecordModal({
     isOpen,
     onClose,
     lookups,
+    onSuccess,
 }: {
     entity: string;
     record: MasterRecord;
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
     lookups: Lookups;
 }) {
     const singularName = entitySingular[entity] || 'Record';
@@ -1079,13 +1148,35 @@ function EditRecordModal({
         }
     };
 
-    const { data, setData, put, processing, errors } = useForm<Record<string, any>>(getFormData());
+    const [data, setData] = useState<Record<string, any>>(getFormData());
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        put(`/admin/master/${entity}/${record.id}`, {
-            onSuccess: () => onClose(),
-        });
+        setProcessing(true);
+        setErrors({});
+        try {
+            const res = await fetch(`/api/v1/admin/master/${entity}/${record.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                onSuccess();
+                onClose();
+            } else if (res.status === 422) {
+                const errData = await res.json();
+                setErrors(errData.errors || {});
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -1134,11 +1225,13 @@ function DeleteRecordModal({
     record,
     isOpen,
     onClose,
+    onSuccess,
 }: {
     entity: string;
     record: MasterRecord;
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }) {
     const [deleting, setDeleting] = useState(false);
     const singularName = entitySingular[entity] || 'Record';

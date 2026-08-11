@@ -1,6 +1,6 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { EllipsisVertical, FolderPlus, Loader2, Plus, SquarePen, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Container } from '@/components/common/container';
 import { DynamicColumn, DynamicTable } from '@/components/common/dynamic-table';
 import { Button } from '@/components/ui/button';
@@ -24,17 +24,35 @@ type Category = {
     updated_at?: string;
 };
 
-type Props = {
-    categories: Category[];
-    filters?: {
-        search?: string;
-    };
-};
-
-export default function BusinessCategoriesIndex({ categories }: Props) {
+export default function BusinessCategoriesIndex() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+
+    const fetchCategories = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch('/api/v1/admin/master/business-categories', {
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            const data = await res.json();
+            if (data.data) {
+                setCategories(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
     const columns = useMemo<DynamicColumn<Category>[]>(
         () => [
@@ -117,22 +135,33 @@ export default function BusinessCategoriesIndex({ categories }: Props) {
             </Container>
 
             <Container>
-                <DynamicTable
-                    data={categories}
-                    columns={columns}
-                    searchPlaceholder="Search categories..."
-                    exportFilename="business-categories"
-                    defaultPageSize={5}
-                />
+                {isLoading ? (
+                    <div className="flex justify-center p-8">
+                        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                ) : (
+                    <DynamicTable
+                        data={categories}
+                        columns={columns}
+                        searchPlaceholder="Search categories..."
+                        exportFilename="business-categories"
+                        defaultPageSize={5}
+                    />
+                )}
             </Container>
 
-            <CreateCategoryModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+            <CreateCategoryModal 
+                isOpen={isCreateOpen} 
+                onClose={() => setIsCreateOpen(false)} 
+                onSuccess={fetchCategories} 
+            />
 
             {editingCategory && (
                 <EditCategoryModal
                     category={editingCategory}
                     isOpen={Boolean(editingCategory)}
                     onClose={() => setEditingCategory(null)}
+                    onSuccess={fetchCategories}
                 />
             )}
 
@@ -141,25 +170,46 @@ export default function BusinessCategoriesIndex({ categories }: Props) {
                     category={deletingCategory}
                     isOpen={Boolean(deletingCategory)}
                     onClose={() => setDeletingCategory(null)}
+                    onSuccess={fetchCategories}
                 />
             )}
         </>
     );
 }
 
-function CreateCategoryModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        category: '',
-    });
+function CreateCategoryModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void, onSuccess: () => void }) {
+    const [category, setCategory] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        post('/admin/master/business-categories', {
-            onSuccess: () => {
-                reset();
+        setProcessing(true);
+        setErrors({});
+        
+        try {
+            const res = await fetch('/api/v1/admin/master/business-categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ category }),
+            });
+            
+            if (res.ok) {
+                setCategory('');
+                onSuccess();
                 onClose();
-            },
-        });
+            } else if (res.status === 422) {
+                const data = await res.json();
+                setErrors(data.errors || {});
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -185,14 +235,14 @@ function CreateCategoryModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                             </Label>
                             <Input
                                 id="category"
-                                value={data.category}
-                                onChange={(e) => setData('category', e.target.value)}
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
                                 placeholder="e.g. Retail, Healthcare, IT"
                                 className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
                                 required
                             />
                             {errors.category && (
-                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.category}</p>
+                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.category[0]}</p>
                             )}
                         </div>
                     </div>
@@ -216,20 +266,44 @@ function EditCategoryModal({
     category,
     isOpen,
     onClose,
+    onSuccess,
 }: {
     category: Category;
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }) {
-    const { data, setData, put, processing, errors } = useForm({
-        category: category.category,
-    });
+    const [name, setName] = useState(category.category);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        put(`/admin/master/business-categories/${category.id}`, {
-            onSuccess: () => onClose(),
-        });
+        setProcessing(true);
+        setErrors({});
+        
+        try {
+            const res = await fetch(`/api/v1/admin/master/business-categories/${category.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ category: name }),
+            });
+            
+            if (res.ok) {
+                onSuccess();
+                onClose();
+            } else if (res.status === 422) {
+                const data = await res.json();
+                setErrors(data.errors || {});
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -255,13 +329,13 @@ function EditCategoryModal({
                             </Label>
                             <Input
                                 id="edit-category"
-                                value={data.category}
-                                onChange={(e) => setData('category', e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
                                 required
                             />
                             {errors.category && (
-                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.category}</p>
+                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.category[0]}</p>
                             )}
                         </div>
                     </div>
@@ -285,21 +359,33 @@ function DeleteCategoryModal({
     category,
     isOpen,
     onClose,
+    onSuccess,
 }: {
     category: Category;
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }) {
     const [deleting, setDeleting] = useState(false);
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setDeleting(true);
-        router.delete(`/admin/master/business-categories/${category.id}`, {
-            onFinish: () => {
-                setDeleting(false);
+        try {
+            const res = await fetch(`/api/v1/admin/master/business-categories/${category.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+            if (res.ok) {
+                onSuccess();
                 onClose();
-            },
-        });
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setDeleting(false);
+        }
     };
 
     return (

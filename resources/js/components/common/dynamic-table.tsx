@@ -15,6 +15,7 @@ import {
     X,
 } from 'lucide-react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,6 +66,8 @@ export type DynamicTableProps<T> = {
     defaultPageSize?: number;
     pageSizeOptions?: number[];
     emptyMessage?: string;
+    isLoading?: boolean;
+    skeletonCount?: number;
 };
 
 export function DynamicTable<T extends Record<string, any>>({
@@ -79,6 +82,8 @@ export function DynamicTable<T extends Record<string, any>>({
     defaultPageSize = 5,
     pageSizeOptions = [5, 10, 25, 50, 100, 500, 1000],
     emptyMessage = 'No records found.',
+    isLoading = false,
+    skeletonCount = 5,
 }: DynamicTableProps<T>) {
     const [search, setSearch] = useState('');
     const [sortKey, setSortKey] = useState<string | null>(null);
@@ -526,26 +531,46 @@ export function DynamicTable<T extends Record<string, any>>({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {paginatedData.map((item, index) => (
-                                <tr key={item.id ?? index} className="transition-colors hover:bg-muted/30">
-                                    {visibleColumns.map((col) => (
-                                        <td
-                                            key={col.key}
-                                            className={cn(
-                                                'px-5 py-4',
-                                                col.align === 'center' && 'text-center',
-                                                col.align === 'right' && 'text-right',
-                                                col.className
-                                            )}
-                                        >
-                                            {col.cell
-                                                ? col.cell(item, pageIndex * pageSize + index)
-                                                : item[col.key] ?? '-'}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                            {paginatedData.length === 0 && (
+                            {isLoading ? (
+                                Array.from({ length: skeletonCount }).map((_, rowIndex) => (
+                                    <tr key={`skeleton-${rowIndex}`} className="transition-colors hover:bg-muted/30">
+                                        {visibleColumns.map((col) => (
+                                            <td
+                                                key={`skeleton-${col.key}`}
+                                                className={cn(
+                                                    'px-5 py-4',
+                                                    col.align === 'center' && 'text-center',
+                                                    col.align === 'right' && 'text-right',
+                                                    col.className
+                                                )}
+                                            >
+                                                <Skeleton className="h-6 w-full max-w-[200px]" />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                paginatedData.map((item, index) => (
+                                    <tr key={item.id ?? index} className="transition-colors hover:bg-muted/30">
+                                        {visibleColumns.map((col) => (
+                                            <td
+                                                key={col.key}
+                                                className={cn(
+                                                    'px-5 py-4',
+                                                    col.align === 'center' && 'text-center',
+                                                    col.align === 'right' && 'text-right',
+                                                    col.className
+                                                )}
+                                            >
+                                                {col.cell
+                                                    ? col.cell(item, pageIndex * pageSize + index)
+                                                    : item[col.key] ?? '-'}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
+                            {!isLoading && paginatedData.length === 0 && (
                                 <tr>
                                     <td
                                         colSpan={visibleColumns.length}

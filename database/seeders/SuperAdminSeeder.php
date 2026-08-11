@@ -14,11 +14,11 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         $admin = SuperAdmin::query()->updateOrCreate(
-            ['email' => env('SUPER_ADMIN_EMAIL', 'admin@example.com')],
+            ['email' => env('SUPER_ADMIN_EMAIL', 'admin@gmail.com')],
             [
                 'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),
                 'number' => env('SUPER_ADMIN_NUMBER', '9999999999'),
-                'password' => env('SUPER_ADMIN_PASSWORD', 'password'),
+                'password' => env('SUPER_ADMIN_PASSWORD', '12345678'),
                 'auth_token' => null,
                 'auth_token_expiry' => null,
             ],
