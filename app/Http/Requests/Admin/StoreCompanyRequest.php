@@ -56,6 +56,22 @@ class StoreCompanyRequest extends FormRequest
                 Password::defaults(),
                 'confirmed',
             ],
+            'document_type' => ['nullable', 'string', 'max:50'],
+            'document_number' => ['nullable', 'string', 'max:100'],
+            'plan_id' => ['nullable', 'integer', 'exists:plans,id'],
+            'billing_cycle' => ['nullable', 'string', 'in:monthly,yearly'],
+            'calling_pin_code' => ['nullable', 'string', 'max:5'],
+            'profile_picture' => ['nullable', 'file', 'max:2048', 'mimes:jpg,jpeg,png'],
+            'id_type' => ['nullable', 'string', 'max:50'],
+            'id_proof' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
+            'address_type' => ['nullable', 'string', 'max:50'],
+            'address_proof' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
+            'remark' => ['nullable', 'string', 'max:1000'],
+            'main_branch' => ['nullable', 'string', 'max:255'],
+            'active_from' => ['nullable', 'date'],
+            'active_to' => ['nullable', 'date'],
+            'received_amount' => ['nullable', 'numeric'],
+            'number_of_branch' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

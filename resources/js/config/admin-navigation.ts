@@ -45,6 +45,19 @@ export const superAdminNavigation: AdminNavGroup[] = [
         ],
     },
     {
+        title: 'Company Management',
+        items: [
+            {
+                title: 'Companies',
+                href: '/admin/companies',
+                icon: Building2,
+                active: ['/admin/companies'],
+                guard: 'super_admin',
+                permission: 'company.view',
+            },
+        ],
+    },
+    {
         title: 'Master Management',
         items: [
             {

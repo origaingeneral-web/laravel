@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\Master\AreaWebController;
 use App\Http\Controllers\Admin\Master\BusinessCategoryWebController;
 use App\Http\Controllers\Admin\Master\CityWebController;
@@ -25,6 +26,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('clear-cache', [MasterController::class, 'clearCache'])->name('clear-cache');
 
         Route::inertia('ai-assistant', 'admin/ai-assistant')->name('ai-assistant');
+
+        Route::resource('companies', CompanyController::class);
 
         // Master Routes
         Route::prefix('master')->name('master.')->group(function (): void {
