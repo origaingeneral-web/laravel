@@ -491,7 +491,7 @@ export function DynamicTable<T extends Record<string, any>>({
                 <div className="overflow-x-auto">
                     <table className="w-full text-left align-middle text-sm text-foreground">
                         <thead>
-                            <tr className="border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            <tr className="border-b border-border bg-muted text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 {visibleColumns.map((col) => (
                                     <th
                                         key={col.key}

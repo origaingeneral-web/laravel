@@ -38,8 +38,9 @@ export default function Index({ companies, filters, statusOptions }: any) {
     const columns = [
         {
             key: 'select',
+            className: 'w-[50px] min-w-[50px] max-w-[50px] px-0 text-center',
             header: (
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center w-full h-full">
                     <Checkbox 
                         className="translate-y-[1px]" 
                         checked={isAllSelected}
@@ -50,11 +51,13 @@ export default function Index({ companies, filters, statusOptions }: any) {
             align: 'center',
             hideable: false,
             cell: (item: any) => (
-                <Checkbox 
-                    className="translate-y-[2px]" 
-                    checked={selectedIds.includes(item.id)}
-                    onCheckedChange={(c: boolean) => handleSelect(item.id, c)}
-                />
+                <div className="flex items-center justify-center w-full h-full">
+                    <Checkbox 
+                        className="translate-y-[2px]" 
+                        checked={selectedIds.includes(item.id)}
+                        onCheckedChange={(c: boolean) => handleSelect(item.id, c)}
+                    />
+                </div>
             ),
         },
         {
