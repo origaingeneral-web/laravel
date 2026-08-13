@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\UpdateCompanyRequest;
 use App\Models\Company;
 use App\Models\CompanyProduct;
 use App\Models\User;
+use App\Models\UserProductAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,7 @@ class CompanyController extends Controller
                 'status',
                 'created_at',
             ])
+            ->with(['companyProducts.plan'])
             ->withCount('companyProducts')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($inner) use ($search): void {
@@ -50,6 +52,28 @@ class CompanyController extends Controller
             ->orderByDesc('id')
             ->paginate($perPage)
             ->withQueryString();
+
+        $companies->getCollection()->transform(function ($company) {
+            $product = $company->companyProducts->first();
+            if ($product) {
+                $company->plan_name = $product->plan?->plan_name ?? 'N/A';
+                $company->expires_at = $product->expires_at ? $product->expires_at->format('Y-m-d') : 'N/A';
+                
+                $usage = \App\Models\UserProductAccess::query()
+                    ->where('company_id', $company->id)
+                    ->where('product_id', $product->product_id)
+                    ->where('is_active', true)
+                    ->count();
+                
+                $company->usage_info = $usage . ' / ' . ($product->staff_limit ?: '∞');
+            } else {
+                $company->plan_name = 'N/A';
+                $company->expires_at = 'N/A';
+                $company->usage_info = '0 / 0';
+            }
+            $company->makeHidden('companyProducts');
+            return $company;
+        });
 
         return Inertia::render('admin/companies/index', [
             'companies' => $companies,
@@ -121,7 +145,7 @@ class CompanyController extends Controller
 
         $company->load([
             'companyProducts.product:id,name,code,is_active',
-            'companyProducts.plan:id,product_id,plan_name',
+            'companyProducts.plan:id,product_id,plan_name,features',
         ]);
 
         return Inertia::render('admin/companies/show', [
@@ -152,9 +176,15 @@ class CompanyController extends Controller
                     'is_accessible' => $subscription->isAccessible(),
                     'plan_id' => $subscription->plan_id,
                     'plan_name' => $subscription->plan?->plan_name,
+                    'features' => $subscription->plan?->features ?? [],
                     'starts_at' => $subscription->starts_at,
                     'expires_at' => $subscription->expires_at,
                     'staff_limit' => $subscription->staff_limit,
+                    'usage' => UserProductAccess::query()
+                        ->where('company_id', $company->id)
+                        ->where('product_id', $subscription->product_id)
+                        ->where('is_active', true)
+                        ->count(),
                 ]),
             ],
             'statusOptions' => $this->statusOptions(),

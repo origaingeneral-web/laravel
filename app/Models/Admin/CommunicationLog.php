@@ -1,32 +1,36 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Admin;
 
+use App\Models\Company;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CompanyProductCredit extends Model
+class CommunicationLog extends Model
 {
     protected $fillable = [
         'company_id',
-        'product_id',
-        'balance',
+        'type',
+        'recipient',
+        'subject',
+        'message',
+        'status',
+        'error_message',
+        'sent_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'balance' => 'decimal:2',
+            'sent_at' => 'datetime',
         ];
     }
 
+    /**
+     * @return BelongsTo<Company, $this>
+     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
     }
 }

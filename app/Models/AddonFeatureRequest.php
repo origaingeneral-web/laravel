@@ -10,9 +10,6 @@ class AddonFeatureRequest extends Model
 {
     use SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'company_id',
         'product_id',
@@ -23,33 +20,21 @@ class AddonFeatureRequest extends Model
         'admin_notes',
     ];
 
-    /**
-     * @return BelongsTo<Company, $this>
-     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /**
-     * @return BelongsTo<Product, $this>
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * @return BelongsTo<Feature, $this>
-     */
     public function feature(): BelongsTo
     {
         return $this->belongsTo(Feature::class);
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
     public function requester(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requested_by');

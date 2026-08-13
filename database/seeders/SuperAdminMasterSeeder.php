@@ -195,16 +195,21 @@ class SuperAdminMasterSeeder extends Seeder
             }
 
             foreach ($product['plans'] as $plan) {
+                $planData = $plan;
+                if (isset($planData['features'])) {
+                    $planData['features'] = json_encode($planData['features']);
+                }
+
                 DB::table('plans')->updateOrInsert(
                     ['product_id' => $productId, 'plan_name' => $plan['plan_name']],
-                    [...$plan, 'is_active' => true, 'created_at' => $now, 'updated_at' => $now],
+                    [...$planData, 'is_active' => true, 'created_at' => $now, 'updated_at' => $now],
                 );
             }
         }
     }
 
     /**
-     * @return list<array{code: string, name: string, description: string, sort_order: int, plans: list<array{plan_name: string, price: int, duration_in_days: int, staff_limit: int, tracking_duration: int, remarks: string}>}>
+     * @return list<array{code: string, name: string, description: string, sort_order: int, plans: list<array{plan_name: string, price: int, duration_in_days: int, staff_limit: int, tracking_duration: int, remarks: string, features?: list<string>}>}>
      */
     private function products(): array
     {
@@ -222,6 +227,7 @@ class SuperAdminMasterSeeder extends Seeder
                         'staff_limit' => 25,
                         'tracking_duration' => 24,
                         'remarks' => 'Starter plan for small teams',
+                        'features' => ['CRM', 'Invoicing', 'Basic Support'],
                     ],
                     [
                         'plan_name' => 'F2 Growth',
@@ -230,6 +236,7 @@ class SuperAdminMasterSeeder extends Seeder
                         'staff_limit' => 75,
                         'tracking_duration' => 24,
                         'remarks' => 'Growth plan for larger teams',
+                        'features' => ['CRM', 'Invoicing', 'Priority Support', 'API Access', 'Custom Roles'],
                     ],
                 ],
             ],
@@ -246,6 +253,7 @@ class SuperAdminMasterSeeder extends Seeder
                         'staff_limit' => 10,
                         'tracking_duration' => 12,
                         'remarks' => 'Professional companion plan',
+                        'features' => ['Operations Dashboard', 'Real-time Tracking'],
                     ],
                 ],
             ],

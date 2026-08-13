@@ -11,7 +11,7 @@ const containerVariants = cva('w-full mx-auto px-4 lg:px-6', {
     },
   },
   defaultVariants: {
-    width: 'fixed',
+    width: 'fluid',
   },
 });
 
@@ -23,7 +23,7 @@ export interface ContainerProps extends VariantProps<typeof containerVariants> {
 
 export function Container({ children, width, className = '' }: ContainerProps) {
   const { settings } = useSettings();
-  const effectiveWidth = width ?? settings.container ?? 'fixed';
+  const effectiveWidth = width ?? settings.container ?? 'fluid';
 
   return (
     <div

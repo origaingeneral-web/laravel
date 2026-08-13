@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Company\StoreAddonFeatureRequest;
 use App\Http\Resources\Api\Company\AddonFeatureRequestResource;
 use App\Models\AddonFeatureRequest;
+use App\Models\Admin\Feature;
 use App\Models\CompanyProduct;
-use App\Models\Feature;
 use Illuminate\Http\JsonResponse;
 
 class ProductAddonFeatureRequestController extends Controller

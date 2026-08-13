@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Admin\Master\Plan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CompanyProduct extends Model
 {
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'company_id',
         'product_id',
@@ -22,9 +20,6 @@ class CompanyProduct extends Model
         'notes',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -48,33 +43,21 @@ class CompanyProduct extends Model
         return $this->status === 'active' && ! $this->isExpired();
     }
 
-    /**
-     * @return BelongsTo<Company, $this>
-     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /**
-     * @return BelongsTo<Product, $this>
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * @return BelongsTo<Plan, $this>
-     */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
 
-    /**
-     * @return HasOne<CompanyProductCredit, $this>
-     */
     public function credit(): HasOne
     {
         return $this->hasOne(CompanyProductCredit::class, 'product_id', 'product_id')

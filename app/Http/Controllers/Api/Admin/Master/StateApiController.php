@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin\Master\Country;
 use App\Models\Admin\Master\State;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -71,11 +72,11 @@ class StateApiController extends Controller
 
         foreach ($request->input('rows', []) as $row) {
             $countryId = $row['country_id'] ?? null;
-            if (!$countryId && !empty($row['country'])) {
-                $countryId = \App\Models\Admin\Master\Country::where('country', $row['country'])->value('id');
+            if (! $countryId && ! empty($row['country'])) {
+                $countryId = Country::where('country', $row['country'])->value('id');
             }
 
-            if ($countryId && !empty($row['state'])) {
+            if ($countryId && ! empty($row['state'])) {
                 State::updateOrCreate(
                     ['state' => $row['state'], 'country_id' => $countryId],
                     ['code' => $row['code'] ?? null]

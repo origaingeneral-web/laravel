@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Master\Area;
+use App\Models\Admin\Master\City;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -71,11 +72,11 @@ class AreaApiController extends Controller
 
         foreach ($request->input('rows', []) as $row) {
             $cityId = $row['city_id'] ?? null;
-            if (!$cityId && !empty($row['city'])) {
-                $cityId = \App\Models\Admin\Master\City::where('city', $row['city'])->value('id');
+            if (! $cityId && ! empty($row['city'])) {
+                $cityId = City::where('city', $row['city'])->value('id');
             }
 
-            if ($cityId && !empty($row['area'])) {
+            if ($cityId && ! empty($row['area'])) {
                 Area::updateOrCreate(
                     ['area' => $row['area'], 'city_id' => $cityId],
                     ['zipcode' => $row['zipcode'] ?? null]

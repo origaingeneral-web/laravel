@@ -68,7 +68,16 @@ export default function Index({ companies, filters, statusOptions }: any) {
             cell: (_item: any, index: number) => <span className="text-muted-foreground font-medium">{index + 1}</span>,
         },
         { key: 'company_code', header: 'Code', sortable: true },
-        { key: 'company_name', header: 'Name', sortable: true },
+        { 
+            key: 'company_name', 
+            header: 'Name', 
+            sortable: true,
+            cell: (item: any) => (
+                <Link href={`/admin/companies/${item.id}`} className="font-semibold text-primary hover:underline">
+                    {item.company_name}
+                </Link>
+            )
+        },
         { key: 'email', header: 'Email', sortable: true },
         { key: 'mobile', header: 'Mobile', sortable: true },
         { 
@@ -80,6 +89,9 @@ export default function Index({ companies, filters, statusOptions }: any) {
                 </span>
             )
         },
+        { key: 'plan_name', header: 'Plan', sortable: true, isDefault: false, className: 'whitespace-nowrap' },
+        { key: 'expires_at', header: 'Expired Date', sortable: true, isDefault: false, className: 'whitespace-nowrap' },
+        { key: 'usage_info', header: 'Used / Total', sortable: false, isDefault: false, className: 'whitespace-nowrap text-center', align: 'center' },
         { key: 'created_at', header: 'Created At', sortable: true },
         {
             key: 'actions',
@@ -96,7 +108,11 @@ export default function Index({ companies, filters, statusOptions }: any) {
                     <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem className="cursor-pointer gap-2"><ShieldAlert className="size-4" /> Update Access</DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer gap-2"><LifeBuoy className="size-4" /> Support Given</DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer gap-2"><User className="size-4" /> Profile</DropdownMenuItem>
+                        <DropdownMenuItem asChild className="cursor-pointer gap-2">
+                            <Link href={`/admin/companies/${item.id}`}>
+                                <User className="size-4" /> Profile
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer gap-2"><SquarePen className="size-4" /> Update</DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer gap-2"><KeyRound className="size-4" /> Reset Password</DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer gap-2"><LogIn className="size-4" /> Login To Panel</DropdownMenuItem>

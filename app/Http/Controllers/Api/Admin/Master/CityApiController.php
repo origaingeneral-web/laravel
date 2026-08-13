@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Master\City;
+use App\Models\Admin\Master\State;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -71,11 +72,11 @@ class CityApiController extends Controller
 
         foreach ($request->input('rows', []) as $row) {
             $stateId = $row['state_id'] ?? null;
-            if (!$stateId && !empty($row['state'])) {
-                $stateId = \App\Models\Admin\Master\State::where('state', $row['state'])->value('id');
+            if (! $stateId && ! empty($row['state'])) {
+                $stateId = State::where('state', $row['state'])->value('id');
             }
 
-            if ($stateId && !empty($row['city'])) {
+            if ($stateId && ! empty($row['city'])) {
                 City::updateOrCreate(
                     ['city' => $row['city'], 'state_id' => $stateId],
                     ['is_top_city' => $row['is_top_city'] ?? false]

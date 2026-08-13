@@ -13,9 +13,6 @@ class Company extends Model
 {
     use SoftDeletes;
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'business_category_id',
         'company_name',
@@ -38,9 +35,6 @@ class Company extends Model
         'terms_accepted_at',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -55,25 +49,16 @@ class Company extends Model
         return $this->status === CompanyStatus::Active->value && ! $this->trashed();
     }
 
-    /**
-     * @return HasMany<User, $this>
-     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }
 
-    /**
-     * @return HasMany<CompanyProduct, $this>
-     */
     public function companyProducts(): HasMany
     {
         return $this->hasMany(CompanyProduct::class);
     }
 
-    /**
-     * @return BelongsToMany<Product, $this>
-     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'company_products')

@@ -21,6 +21,7 @@ class Plan extends Model
         'staff_limit',
         'tracking_duration',
         'remarks',
+        'features',
         'is_active',
     ];
 
@@ -35,6 +36,7 @@ class Plan extends Model
             'staff_limit' => 'integer',
             'tracking_duration' => 'integer',
             'is_active' => 'boolean',
+            'features' => 'array',
         ];
     }
 

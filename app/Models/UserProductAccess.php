@@ -9,9 +9,6 @@ class UserProductAccess extends Model
 {
     protected $table = 'user_product_access';
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'user_id',
         'company_id',
@@ -19,9 +16,6 @@ class UserProductAccess extends Model
         'is_active',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -29,25 +23,16 @@ class UserProductAccess extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo<Company, $this>
-     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /**
-     * @return BelongsTo<Product, $this>
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

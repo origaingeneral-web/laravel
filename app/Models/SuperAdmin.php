@@ -18,9 +18,6 @@ class SuperAdmin extends Authenticatable
      */
     protected string $guard_name = 'super_admin';
 
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -31,17 +28,11 @@ class SuperAdmin extends Authenticatable
         'last_login',
     ];
 
-    /**
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'auth_token',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [

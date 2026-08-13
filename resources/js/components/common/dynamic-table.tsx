@@ -15,6 +15,7 @@ import {
     X,
 } from 'lucide-react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { router } from '@inertiajs/react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ export type DynamicColumn<T> = {
     sortable?: boolean;
     sortValue?: (item: T) => string | number;
     hideable?: boolean;
+    isDefault?: boolean;
     align?: 'left' | 'center' | 'right';
     className?: string;
 };
@@ -79,19 +81,33 @@ export function DynamicTable<T extends Record<string, any>>({
     searchFilter,
     actions,
     exportFilename = 'export',
-    defaultPageSize = 5,
-    pageSizeOptions = [5, 10, 25, 50, 100, 500, 1000],
+    defaultPageSize = 10,
+    pageSizeOptions = [10, 25, 50, 100, 500, 1000],
     emptyMessage = 'No records found.',
     isLoading = false,
-    skeletonCount = 5,
+    skeletonCount = 10,
 }: DynamicTableProps<T>) {
     const [search, setSearch] = useState('');
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(defaultPageSize);
-    const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+    const [hiddenColumns, setHiddenColumns] = useState<string[]>(() => {
+        return columns.filter(col => col.isDefault === false).map(col => col.key);
+    });
     const [copied, setCopied] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    useEffect(() => {
+        const removeStart = router.on('start', () => setIsNavigating(true));
+        const removeFinish = router.on('finish', () => setIsNavigating(false));
+        return () => {
+            removeStart();
+            removeFinish();
+        };
+    }, []);
+
+    const showLoading = isLoading || isNavigating;
 
     // Reset pagination when search or sort changes
     useEffect(() => {
@@ -197,6 +213,11 @@ export function DynamicTable<T extends Record<string, any>>({
         } else {
             setHiddenColumns(hideableColumns.map(col => col.key));
         }
+    };
+
+    // Toggle default columns
+    const toggleDefaultColumns = () => {
+        setHiddenColumns(columns.filter(col => col.isDefault === false).map(col => col.key));
     };
 
     // Export CSV
@@ -423,6 +444,19 @@ export function DynamicTable<T extends Record<string, any>>({
                                             Toggle All
                                         </Label>
                                     </div>
+                                    <div className="flex items-center gap-2.5 pb-2 mb-2 border-b border-border/40">
+                                        <Checkbox
+                                            id="col-toggle-default"
+                                            checked={hiddenColumns.length === columns.filter(c => c.isDefault === false).length && columns.filter(c => c.isDefault === false).every(c => hiddenColumns.includes(c.key))}
+                                            onCheckedChange={() => toggleDefaultColumns()}
+                                        />
+                                        <Label
+                                            htmlFor="col-toggle-default"
+                                            className="text-xs font-semibold cursor-pointer"
+                                        >
+                                            Default Columns
+                                        </Label>
+                                    </div>
                                     {hideableColumns.map((col) => {
                                         const isChecked = !hiddenColumns.includes(col.key);
                                         return (
@@ -531,7 +565,7 @@ export function DynamicTable<T extends Record<string, any>>({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {isLoading ? (
+                            {showLoading ? (
                                 Array.from({ length: skeletonCount }).map((_, rowIndex) => (
                                     <tr key={`skeleton-${rowIndex}`} className="transition-colors hover:bg-muted/30">
                                         {visibleColumns.map((col) => (
@@ -570,7 +604,7 @@ export function DynamicTable<T extends Record<string, any>>({
                                     </tr>
                                 ))
                             )}
-                            {!isLoading && paginatedData.length === 0 && (
+                            {!showLoading && paginatedData.length === 0 && (
                                 <tr>
                                     <td
                                         colSpan={visibleColumns.length}

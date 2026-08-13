@@ -30,9 +30,9 @@ test('super admin can store, update, and delete languages master record', functi
 
     // Store
     $response = $this->postJson(route('api.v1.admin.master.languages.store'), [
-            'language' => 'French',
-            'code' => 'fr',
-        ]);
+        'language' => 'French',
+        'code' => 'fr',
+    ]);
 
     $response->assertCreated();
     $this->assertDatabaseHas('languages', ['language' => 'French', 'code' => 'fr']);
@@ -41,9 +41,9 @@ test('super admin can store, update, and delete languages master record', functi
 
     // Update
     $response = $this->putJson(route('api.v1.admin.master.languages.update', ['language' => $id]), [
-            'language' => 'French (Canadian)',
-            'code' => 'fr-ca',
-        ]);
+        'language' => 'French (Canadian)',
+        'code' => 'fr-ca',
+    ]);
 
     $response->assertOk();
     $this->assertDatabaseHas('languages', ['id' => $id, 'language' => 'French (Canadian)', 'code' => 'fr-ca']);
@@ -60,10 +60,10 @@ test('super admin can store, update, and delete countries master record', functi
 
     // Store
     $response = $this->postJson(route('api.v1.admin.master.countries.store'), [
-            'country' => 'Testland',
-            'iso3' => 'TSL',
-            'phone_code' => '999',
-        ]);
+        'country' => 'Testland',
+        'iso3' => 'TSL',
+        'phone_code' => '999',
+    ]);
 
     $response->assertCreated();
     $this->assertDatabaseHas('countries', ['country' => 'Testland', 'iso3' => 'TSL']);
@@ -72,10 +72,10 @@ test('super admin can store, update, and delete countries master record', functi
 
     // Update
     $response = $this->putJson(route('api.v1.admin.master.countries.update', ['country' => $id]), [
-            'country' => 'Testland Prime',
-            'iso3' => 'TLP',
-            'phone_code' => '998',
-        ]);
+        'country' => 'Testland Prime',
+        'iso3' => 'TLP',
+        'phone_code' => '998',
+    ]);
 
     $response->assertOk();
     $this->assertDatabaseHas('countries', ['id' => $id, 'country' => 'Testland Prime']);
@@ -94,11 +94,11 @@ test('super admin can bulk import states, cities, and areas', function (): void 
 
     // 1. Import States
     $response = $this->postJson(route('api.v1.admin.master.states.import'), [
-            'rows' => [
-                ['state' => 'Import State 1', 'country' => 'Importland', 'code' => 'IS1'],
-                ['state' => 'Import State 2', 'country_id' => $countryId, 'code' => 'IS2'],
-            ],
-        ]);
+        'rows' => [
+            ['state' => 'Import State 1', 'country' => 'Importland', 'code' => 'IS1'],
+            ['state' => 'Import State 2', 'country_id' => $countryId, 'code' => 'IS2'],
+        ],
+    ]);
 
     $response->assertOk();
     $this->assertDatabaseHas('states', ['state' => 'Import State 1', 'country_id' => $countryId]);
@@ -108,11 +108,11 @@ test('super admin can bulk import states, cities, and areas', function (): void 
 
     // 2. Import Cities
     $response = $this->postJson(route('api.v1.admin.master.cities.import'), [
-            'rows' => [
-                ['city' => 'Import City 1', 'state' => 'Import State 1', 'is_top_city' => true],
-                ['city' => 'Import City 2', 'state_id' => $stateId, 'is_top_city' => false],
-            ],
-        ]);
+        'rows' => [
+            ['city' => 'Import City 1', 'state' => 'Import State 1', 'is_top_city' => true],
+            ['city' => 'Import City 2', 'state_id' => $stateId, 'is_top_city' => false],
+        ],
+    ]);
 
     $response->assertOk();
     $this->assertDatabaseHas('cities', ['city' => 'Import City 1', 'state_id' => $stateId, 'is_top_city' => 1]);
@@ -122,11 +122,11 @@ test('super admin can bulk import states, cities, and areas', function (): void 
 
     // 3. Import Areas
     $response = $this->postJson(route('api.v1.admin.master.areas.import'), [
-            'rows' => [
-                ['area' => 'Import Area 1', 'city' => 'Import City 1', 'zipcode' => '99001'],
-                ['area' => 'Import Area 2', 'city_id' => $cityId, 'zipcode' => '99002'],
-            ],
-        ]);
+        'rows' => [
+            ['area' => 'Import Area 1', 'city' => 'Import City 1', 'zipcode' => '99001'],
+            ['area' => 'Import Area 2', 'city_id' => $cityId, 'zipcode' => '99002'],
+        ],
+    ]);
 
     $response->assertOk();
     $this->assertDatabaseHas('areas', ['area' => 'Import Area 1', 'city_id' => $cityId, 'zipcode' => '99001']);

@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class CompanyProductCreditLog extends Model
 {
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
         'company_id',
         'product_id',
@@ -23,9 +20,6 @@ class CompanyProductCreditLog extends Model
         'created_by',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -34,33 +28,21 @@ class CompanyProductCreditLog extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo<Company, $this>
-     */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /**
-     * @return BelongsTo<Product, $this>
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
     public function reference(): MorphTo
     {
         return $this->morphTo();

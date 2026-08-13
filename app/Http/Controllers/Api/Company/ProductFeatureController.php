@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Company;
 use App\Http\Concerns\RespondsWithJson;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\Company\FeatureResource;
+use App\Models\Admin\Feature;
 use App\Models\CompanyProduct;
-use App\Models\Feature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

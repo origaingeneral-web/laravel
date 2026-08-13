@@ -70,6 +70,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
+            if ($status === 500 && config('app.debug')) {
+                return $response;
+            }
+
             return Inertia::render("errors/{$status}")
                 ->toResponse($request)
                 ->setStatusCode($status);
