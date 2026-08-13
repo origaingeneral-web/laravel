@@ -61,6 +61,26 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'app_notifications' => fn () => $user ? \App\Models\Admin\AppAnnouncement::query()
+                ->where('type', 'panel')
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+                })
+                ->where(function ($q) use ($user, $isSuperAdmin) {
+                    $q->where('target_type', 'all');
+                    if (! $isSuperAdmin && isset($user->company_id)) {
+                        $q->orWhere(function ($sq) use ($user) {
+                            $sq->where('target_type', 'company')
+                               ->where('target_id', $user->company_id);
+                        });
+                    }
+                    $q->orWhere(function ($sq) use ($user) {
+                        $sq->where('target_type', 'user')
+                           ->where('target_id', $user->id);
+                    });
+                })
+                ->get(['id', 'title', 'message', 'panel_display_style']) : [],
         ];
     }
 }

@@ -1,6 +1,6 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Save, Mail, MessageSquare, Phone, CreditCard, Clock } from 'lucide-react';
+import { Save, Mail, MessageSquare, Phone, CreditCard, Clock, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
@@ -18,6 +18,7 @@ export default function Edit({ group, settings }: any) {
         whatsapp: { title: 'WhatsApp Configuration', icon: <Phone className="size-5 text-primary" />, desc: 'Configure WhatsApp Business API integration.' },
         payment: { title: 'Payment Gateway', icon: <CreditCard className="size-5 text-primary" />, desc: 'Configure API keys for Stripe, PayPal, Razorpay, etc.' },
         cron: { title: 'Cron Job Settings', icon: <Clock className="size-5 text-primary" />, desc: 'View server cron setup instructions and configure scheduled task behavior.' },
+        firebase: { title: 'Firebase Configuration', icon: <Flame className="size-5 text-primary" />, desc: 'Configure Firebase Web API keys and project settings.' },
     };
     
     const meta = groupMeta[group] || { title: 'Configuration', icon: null, desc: '' };
@@ -29,6 +30,7 @@ export default function Edit({ group, settings }: any) {
         if (group === 'whatsapp') return { whatsapp_api_url: '', whatsapp_token: '', whatsapp_instance_id: '', ...settings };
         if (group === 'payment') return { stripe_key: '', stripe_secret: '', paypal_client_id: '', paypal_secret: '', ...settings };
         if (group === 'cron') return { cron_notification_email: '', ...settings };
+        if (group === 'firebase') return { firebase_api_key: '', firebase_auth_domain: '', firebase_project_id: '', firebase_storage_bucket: '', firebase_messaging_sender_id: '', firebase_app_id: '', firebase_measurement_id: '', ...settings };
         return { ...settings };
     };
 
@@ -201,6 +203,40 @@ export default function Edit({ group, settings }: any) {
                                     <div className="space-y-2">
                                         <Label htmlFor="cron_notification_email">Send Cron Failure Notifications To (Email)</Label>
                                         <Input id="cron_notification_email" value={data.cron_notification_email} onChange={(e) => setData('cron_notification_email', e.target.value)} placeholder="admin@example.com" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- FIREBASE --- */}
+                            {group === 'firebase' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="firebase_project_id">Project ID</Label>
+                                        <Input id="firebase_project_id" value={data.firebase_project_id} onChange={(e) => setData('firebase_project_id', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="firebase_api_key">API Key</Label>
+                                        <Input id="firebase_api_key" value={data.firebase_api_key} onChange={(e) => setData('firebase_api_key', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="firebase_auth_domain">Auth Domain</Label>
+                                        <Input id="firebase_auth_domain" value={data.firebase_auth_domain} onChange={(e) => setData('firebase_auth_domain', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="firebase_storage_bucket">Storage Bucket</Label>
+                                        <Input id="firebase_storage_bucket" value={data.firebase_storage_bucket} onChange={(e) => setData('firebase_storage_bucket', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="firebase_messaging_sender_id">Messaging Sender ID</Label>
+                                        <Input id="firebase_messaging_sender_id" value={data.firebase_messaging_sender_id} onChange={(e) => setData('firebase_messaging_sender_id', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="firebase_app_id">App ID</Label>
+                                        <Input id="firebase_app_id" value={data.firebase_app_id} onChange={(e) => setData('firebase_app_id', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="firebase_measurement_id">Measurement ID (Optional)</Label>
+                                        <Input id="firebase_measurement_id" value={data.firebase_measurement_id} onChange={(e) => setData('firebase_measurement_id', e.target.value)} />
                                     </div>
                                 </div>
                             )}

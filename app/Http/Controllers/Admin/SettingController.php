@@ -13,7 +13,7 @@ class SettingController extends Controller
 {
     public function edit(string $group): Response
     {
-        $validGroups = ['email', 'sms', 'whatsapp', 'payment', 'cron'];
+        $validGroups = ['email', 'sms', 'whatsapp', 'payment', 'cron', 'firebase'];
 
         if (! in_array($group, $validGroups, true)) {
             abort(404);
@@ -29,7 +29,7 @@ class SettingController extends Controller
 
     public function update(Request $request, string $group): RedirectResponse
     {
-        $validGroups = ['email', 'sms', 'whatsapp', 'payment', 'cron'];
+        $validGroups = ['email', 'sms', 'whatsapp', 'payment', 'cron', 'firebase'];
 
         if (! in_array($group, $validGroups, true)) {
             abort(404);

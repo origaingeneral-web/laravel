@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\Master\LanguageWebController;
 use App\Http\Controllers\Admin\Master\PlanWebController;
 use App\Http\Controllers\Admin\Master\StateWebController;
 use App\Http\Controllers\Admin\NotificationTemplateController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SubscriptionController;
@@ -40,6 +41,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('features', FeatureController::class);
         Route::resource('templates', NotificationTemplateController::class);
         Route::get('communication/logs', [CommunicationLogController::class, 'index'])->name('communication.logs');
+        Route::get('communication/notifications/firebase', [NotificationController::class, 'indexFirebase'])->name('notifications.firebase.index');
+        Route::get('communication/notifications/firebase/create', [NotificationController::class, 'createFirebase'])->name('notifications.firebase.create');
+        Route::post('communication/notifications/firebase/create', [NotificationController::class, 'storeFirebase'])->name('notifications.firebase.store');
+        Route::get('communication/notifications/panel', [NotificationController::class, 'indexPanel'])->name('notifications.panel.index');
+        Route::get('communication/notifications/panel/create', [NotificationController::class, 'createPanel'])->name('notifications.panel.create');
+        Route::post('communication/notifications/panel/create', [NotificationController::class, 'storePanel'])->name('notifications.panel.store');
 
         Route::get('settings/{group}', [SettingController::class, 'edit'])->name('settings.edit');
         Route::post('settings/{group}', [SettingController::class, 'update'])->name('settings.update');

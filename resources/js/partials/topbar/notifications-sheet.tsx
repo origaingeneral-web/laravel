@@ -39,8 +39,11 @@ import Item17 from './notifications/item-17';
 import Item18 from './notifications/item-18';
 import Item19 from './notifications/item-19';
 import Item20 from './notifications/item-20';
+import { usePage } from '@inertiajs/react';
 
 export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
+  const { app_notifications } = usePage<any>().props;
+  const bellNotifications = (app_notifications || []).filter((n: any) => n.panel_display_style === 'bell');
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -84,6 +87,23 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
               {/* All Tab */}
               <TabsContent value="all" className="mt-0">
                 <div className="flex flex-col gap-5 overflow-y-auto">
+                  {bellNotifications.map((notif: any) => (
+                    <div key={notif.id} className="flex gap-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                        <div className="flex items-center justify-center size-10 bg-blue-100 dark:bg-blue-900/50 rounded-full shrink-0">
+                            <Bell className="size-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex flex-col flex-1">
+                            <div className="flex justify-between items-start">
+                                <span className="font-semibold text-sm text-foreground">{notif.title}</span>
+                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">Just now</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">{notif.message}</p>
+                        </div>
+                    </div>
+                  ))}
+                  
+                  {bellNotifications.length > 0 && <div className="border-b border-b-border"></div>}
+
                   <Item1
                     userName="Joe Lincoln"
                     avatar="300-4.png"
