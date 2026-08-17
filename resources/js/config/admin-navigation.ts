@@ -18,6 +18,10 @@ import {
     Send,
     Flame,
     Bell,
+    Server,
+    HardDrive,
+    Cpu,
+    SlidersHorizontal,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -317,6 +321,45 @@ export const superAdminNavigation: AdminNavGroup[] = [
                         href: '/admin/settings/firebase',
                         icon: Flame,
                         active: ['/admin/settings/firebase'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        title: 'System',
+        items: [
+            {
+                title: 'System',
+                href: '/admin/system/server',
+                icon: Server,
+                active: ['/admin/system'],
+                guard: 'super_admin',
+                permission: 'admin.access',
+                children: [
+                    {
+                        title: 'Server Information',
+                        href: '/admin/system/server',
+                        icon: Server,
+                        active: ['/admin/system/server'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Environment Config',
+                        href: '/admin/system/env',
+                        icon: SlidersHorizontal,
+                        active: ['/admin/system/env'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Database & Backup',
+                        href: '/admin/system/database',
+                        icon: Database,
+                        active: ['/admin/system/database'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },

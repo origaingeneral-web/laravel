@@ -58,20 +58,21 @@ class CompanyController extends Controller
             if ($product) {
                 $company->plan_name = $product->plan?->plan_name ?? 'N/A';
                 $company->expires_at = $product->expires_at ? $product->expires_at->format('Y-m-d') : 'N/A';
-                
-                $usage = \App\Models\UserProductAccess::query()
+
+                $usage = UserProductAccess::query()
                     ->where('company_id', $company->id)
                     ->where('product_id', $product->product_id)
                     ->where('is_active', true)
                     ->count();
-                
-                $company->usage_info = $usage . ' / ' . ($product->staff_limit ?: '∞');
+
+                $company->usage_info = $usage.' / '.($product->staff_limit ?: '∞');
             } else {
                 $company->plan_name = 'N/A';
                 $company->expires_at = 'N/A';
                 $company->usage_info = '0 / 0';
             }
             $company->makeHidden('companyProducts');
+
             return $company;
         });
 

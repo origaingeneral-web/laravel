@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\AppAnnouncement;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\FirebaseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -47,7 +48,7 @@ class NotificationController extends Controller
 
         $announcement = AppAnnouncement::create($data);
 
-        $firebaseService = new \App\Services\FirebaseService();
+        $firebaseService = new FirebaseService;
         $firebaseService->sendPushNotification(
             $announcement->title,
             $announcement->message,

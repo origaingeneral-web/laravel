@@ -9,10 +9,12 @@ import {
   CreditCard,
   Globe,
   Moon,
+  Palette,
   PanelLeft,
   Settings,
   UserCircle,
 } from 'lucide-react';
+import { PaletteSheet } from '@/partials/topbar/palette-sheet';
 import { useTheme } from 'next-themes';
 import { Link } from 'react-router';
 import { toAbsoluteUrl } from '@/lib/helpers';
@@ -235,6 +237,21 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             />
           </div>
         </DropdownMenuItem>
+
+        <PaletteSheet
+          trigger={
+            <DropdownMenuItem
+              className="flex items-center gap-2.5 cursor-pointer font-medium"
+              onSelect={(event) => event.preventDefault()}
+            >
+              <Palette className="size-4 text-muted-foreground" />
+              <span className="grow text-sm">Theme Palettes</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-bold">
+                Colors
+              </span>
+            </DropdownMenuItem>
+          }
+        />
 
         {/* Logout Button */}
         <div className="p-2 mt-1 border-t border-border/40">

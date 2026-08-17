@@ -140,7 +140,7 @@ export function Header() {
                     >
                         <RefreshCw className="size-4.5!" />
                     </Button>
-                    {/* <PaletteSheet
+                    <PaletteSheet
                         trigger={
                             <Button
                                 variant="ghost"
@@ -152,7 +152,7 @@ export function Header() {
                                 <Palette className="size-4.5!" />
                             </Button>
                         }
-                    /> */}
+                    />
                     <SearchDialog
                         trigger={
                             <Button

@@ -1,9 +1,9 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Bell, Save } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Toolbar, ToolbarActions, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,18 +32,19 @@ export default function CreatePanel({ companies, users }: any) {
             <Container>
                 <Toolbar>
                     <ToolbarHeading title="In-App Panel Announcement" description="Create an announcement that displays inside the application panel." />
+                    <ToolbarActions>
+                        <Button asChild variant="outline" className="gap-2">
+                            <Link href="/admin/communication/notifications/panel">
+                                <ArrowLeft className="size-4" />
+                                Cancel
+                            </Link>
+                        </Button>
+                    </ToolbarActions>
                 </Toolbar>
             </Container>
 
             <Container className="pb-10">
-                <Card className="max-w-3xl border-blue-500/20 shadow-sm shadow-blue-500/5">
-                    <CardHeader className="bg-blue-500/5 border-b border-blue-500/10">
-                        <CardTitle className="flex items-center gap-2 text-xl text-blue-600 dark:text-blue-400">
-                            <Bell className="size-5" />
-                            Compose Panel Notice
-                        </CardTitle>
-                        <CardDescription>This will be displayed in the app UI for the selected users.</CardDescription>
-                    </CardHeader>
+                <Card className="max-w-2xl mx-auto border-border/50 shadow-sm">
                     <CardContent className="pt-6">
                         <form onSubmit={submit} className="space-y-6">
                             
@@ -131,7 +132,7 @@ export default function CreatePanel({ companies, users }: any) {
                             </div>
 
                             <div className="pt-4 flex justify-end border-t mt-6">
-                                <Button type="submit" disabled={processing} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button type="submit" disabled={processing} className="gap-2">
                                     <Save className="size-4" />
                                     Save Announcement
                                 </Button>
