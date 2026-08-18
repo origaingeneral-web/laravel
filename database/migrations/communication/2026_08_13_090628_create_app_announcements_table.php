@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('app_announcements', function (Blueprint $table) {
             $table->id();
+            $table->string('type', 20)->default('panel'); // panel, firebase
             $table->string('title');
             $table->text('message');
-            $table->enum('target_type', ['all', 'company', 'user'])->default('all');
+            $table->string('target_type', 20)->default('all'); // all, company, user
             $table->unsignedBigInteger('target_id')->nullable();
-            $table->enum('type', ['firebase', 'panel'])->default('panel');
-            $table->enum('panel_display_style', ['banner', 'bell'])->nullable();
+            $table->string('panel_display_style', 20)->nullable(); // banner, bell
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });

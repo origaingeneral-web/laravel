@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('fcm_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('group');
-            $table->string('key')->unique();
-            $table->text('value')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('company_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('token')->unique();
+            $table->string('device_type')->default('web'); // android, ios, web
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('fcm_tokens');
     }
 };

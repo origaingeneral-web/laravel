@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('company_product_id')->nullable()->constrained('company_products')->nullOnDelete();
             $table->decimal('amount', 10, 2);
             $table->string('currency')->default('USD');
-            $table->string('status')->default('completed'); // pending, completed, failed, refunded
+            $table->string('status')->default('completed');
             $table->string('payment_method')->nullable();
             $table->string('transaction_id')->nullable()->unique();
             $table->timestamps();

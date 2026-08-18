@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-
-            // $table->unsignedBigInteger('branch_id')->nullable()->comment('Branch ID from branches table');
             $table->unsignedBigInteger('business_category_id')->comment('Business Category ID from business_categories table');
             $table->string('company_name');
             $table->string('company_code', 4)->unique();
@@ -35,8 +33,7 @@ return new class extends Migration
             $table->text('address');
 
             // Documents
-            $table->string('profile')->nullable(); // need to check if is this required or not
-
+            $table->string('profile')->nullable();
             $table->string('id_type')->nullable();
             $table->string('id_proof')->nullable();
             $table->string('addr_type')->nullable();

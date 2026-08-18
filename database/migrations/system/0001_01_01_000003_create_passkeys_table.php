@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('super_admin', function (Blueprint $table) {
+        Schema::create('passkeys', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('number')->unique();
-            $table->string('password');
-            $table->text('auth_token')->nullable();
-            $table->timestamp('auth_token_expiry')->nullable();
-            $table->timestamp('last_login')->nullable();
+            $table->string('credential_id')->unique();
+            $table->text('data');
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('super_admin');
+        Schema::dropIfExists('passkeys');
     }
 };

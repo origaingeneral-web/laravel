@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('software_products', function (Blueprint $table) {
             $table->id();
-
             $table->string('product_name', 100);
             $table->string('slug')->unique();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+
         Schema::create('modules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('software_product_id')->constrained()->cascadeOnDelete();
@@ -30,23 +30,19 @@ return new class extends Migration
             $table->unique(['software_product_id', 'slug']);
             $table->timestamps();
         });
+
         Schema::create('module_features', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('software_product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('module_id')->constrained()->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('module_features')->nullOnDelete();
-
             $table->foreignId('depends_on_feature_id')->nullable()->constrained('module_features')->nullOnDelete();
-
             $table->string('name');
             $table->string('slug');
             $table->string('route_name')->nullable();
             $table->text('search_keywords')->nullable();
-
             $table->boolean('is_default')->default(false);
             $table->boolean('is_paid')->default(false);
-
             $table->boolean('hide_in_branch_manager_access')->default(false);
             $table->boolean('default_for_branch_manager')->default(false);
             $table->boolean('hide_in_quick_search')->default(false);
@@ -59,6 +55,47 @@ return new class extends Migration
 
             $table->unique(['module_id', 'slug']);
         });
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('code')->unique();
+            $table->string('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('plans', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('plan_name');
+            $table->decimal('price', 10, 2);
+            $table->integer('duration_in_days');
+            $table->integer('staff_limit');
+            $table->integer('tracking_duration')->default(24)->comment('in hours');
+            $table->string('remarks')->nullable();
+            $table->json('features')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+
+            $table->index(['product_id', 'is_active'], 'plans_product_active_idx');
+        });
+
+        Schema::create('features', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->string('code');
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->boolean('is_addon')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+
+            $table->unique(['product_id', 'code']);
+            $table->index(['product_id', 'is_active', 'sort_order'], 'features_product_active_sort_idx');
+        });
     }
 
     /**
@@ -66,6 +103,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('features');
+        Schema::dropIfExists('plans');
+        Schema::dropIfExists('products');
         Schema::dropIfExists('module_features');
         Schema::dropIfExists('modules');
         Schema::dropIfExists('software_products');

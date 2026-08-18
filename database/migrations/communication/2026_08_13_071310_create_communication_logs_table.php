@@ -13,14 +13,13 @@ return new class extends Migration
     {
         Schema::create('communication_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('type'); // email, sms, whatsapp
+            $table->string('channel', 20); // email, sms, whatsapp, push
             $table->string('recipient');
+            $table->string('template_purpose')->nullable();
             $table->string('subject')->nullable();
             $table->text('message');
-            $table->string('status')->default('pending'); // pending, success, failed
-            $table->text('error_message')->nullable();
-            $table->timestamp('sent_at')->nullable();
+            $table->string('status', 20)->default('sent'); // sent, failed, pending, delivered
+            $table->text('error_details')->nullable();
             $table->timestamps();
         });
     }

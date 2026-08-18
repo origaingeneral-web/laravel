@@ -19,8 +19,10 @@ return new class extends Migration
             $table->text('email_body')->nullable();
             $table->boolean('is_email_active')->default(false);
             $table->text('sms_body')->nullable();
+            $table->string('sms_dlt_template_id')->nullable();
             $table->boolean('is_sms_active')->default(false);
             $table->text('whatsapp_body')->nullable();
+            $table->string('whatsapp_template_name')->nullable();
             $table->boolean('is_whatsapp_active')->default(false);
             $table->timestamps();
         });

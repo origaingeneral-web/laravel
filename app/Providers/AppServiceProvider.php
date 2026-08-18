@@ -57,6 +57,18 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureRateLimiting();
         $this->configurePolicies();
+        $this->configureMigrations();
+    }
+
+    /**
+     * Register migration directories from subdirectories.
+     */
+    protected function configureMigrations(): void
+    {
+        $mainPath = database_path('migrations');
+        $directories = glob($mainPath.'/*', GLOB_ONLYDIR);
+        $paths = array_merge([$mainPath], $directories ?: []);
+        $this->loadMigrationsFrom($paths);
     }
 
     /**

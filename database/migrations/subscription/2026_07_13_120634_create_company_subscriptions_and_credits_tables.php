@@ -11,48 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('addon_feature_requests');
-        Schema::dropIfExists('credit_logs');
-        Schema::dropIfExists('company_credits');
-        Schema::dropIfExists('company_feature');
-        Schema::dropIfExists('company_plans');
-        Schema::dropIfExists('features');
-
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code')->unique();
-            $table->string('description')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->timestamps();
-        });
-
-        Schema::table('plans', function (Blueprint $table) {
-            $table->foreignId('product_id')->nullable()->after('id')->constrained()->nullOnDelete();
-            $table->boolean('is_active')->default(true)->after('remarks');
-        });
-
-        Schema::create('features', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->string('code');
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->boolean('is_addon')->default(false);
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->timestamps();
-
-            $table->unique(['product_id', 'code']);
-        });
-
         Schema::create('company_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('plan_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('status', 20)->default('active'); // active, expired, inactive, cancelled
+            $table->string('status', 20)->default('active');
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->unsignedInteger('staff_limit')->nullable();
@@ -61,6 +25,8 @@ return new class extends Migration
 
             $table->unique(['company_id', 'product_id']);
             $table->index(['company_id', 'status']);
+            $table->index(['company_id', 'expires_at'], 'company_products_company_expires_idx');
+            $table->index(['status', 'expires_at'], 'company_products_status_expires_idx');
         });
 
         Schema::create('company_product_feature', function (Blueprint $table) {
@@ -74,6 +40,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['company_id', 'product_id', 'feature_id'], 'company_product_feature_unique');
+            $table->index(['company_id', 'product_id', 'is_enabled'], 'cpf_company_product_enabled_idx');
         });
 
         Schema::create('company_product_credits', function (Blueprint $table) {
@@ -111,6 +78,8 @@ return new class extends Migration
 
             $table->unique(['user_id', 'product_id']);
             $table->index(['company_id', 'product_id']);
+            $table->index(['user_id', 'is_active', 'product_id'], 'upa_user_active_product_idx');
+            $table->index(['company_id', 'user_id', 'is_active'], 'upa_company_user_active_idx');
         });
 
         Schema::create('renewal_requests', function (Blueprint $table) {
@@ -155,13 +124,5 @@ return new class extends Migration
         Schema::dropIfExists('company_product_credits');
         Schema::dropIfExists('company_product_feature');
         Schema::dropIfExists('company_products');
-        Schema::dropIfExists('features');
-
-        Schema::table('plans', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('product_id');
-            $table->dropColumn('is_active');
-        });
-
-        Schema::dropIfExists('products');
     }
 };
