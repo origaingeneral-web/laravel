@@ -11,7 +11,27 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { toast } from 'sonner';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 
+const isAppDebugEnabled = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    const appElement = document.getElementById('app');
+    if (appElement?.dataset?.page) {
+      const pageData = JSON.parse(appElement.dataset.page);
+      return Boolean(pageData?.props?.app_debug);
+    }
+  } catch {
+    // Ignore JSON parsing errors
+  }
+
+  return false;
+};
+
 const QueryProvider = ({ children }: { children: ReactNode }) => {
+  const [showDevtools] = useState(() => isAppDebugEnabled());
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,9 +61,13 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      {showDevtools && (
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      )}
     </QueryClientProvider>
   );
 };
 
 export { QueryProvider };
+
+

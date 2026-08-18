@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Master\BusinessCategory;
-use App\Models\SuperAdmin;
+use App\Models\Admin\Master\BusinessCategory;
+use App\Models\Auth\SuperAdmin;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\SuperAdminSeeder;
 

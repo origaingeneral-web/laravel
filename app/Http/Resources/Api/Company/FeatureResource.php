@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Api\Company;
 
-use App\Models\Admin\Feature;
+use App\Models\Admin\Feature\Feature;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

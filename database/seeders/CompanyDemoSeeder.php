@@ -4,15 +4,16 @@ namespace Database\Seeders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\RoleName;
+use App\Models\Admin\Feature\Feature;
 use App\Models\Admin\Master\Plan;
-use App\Models\Company;
-use App\Models\CompanyProduct;
-use App\Models\CompanyProductCredit;
-use App\Models\CompanyProductCreditLog;
-use App\Models\Feature;
-use App\Models\Product;
+use App\Models\Auth\Permission;
+use App\Models\Company\Company;
+use App\Models\Company\CompanyProduct;
+use App\Models\Company\CompanyProductCredit;
+use App\Models\Company\CompanyProductCreditLog;
+use App\Models\Product\Product;
+use App\Models\Product\UserProductAccess;
 use App\Models\User;
-use App\Models\UserProductAccess;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -208,7 +209,34 @@ class CompanyDemoSeeder extends Seeder
             ],
         );
 
-        foreach ([$crm, $analytics] as $feature) {
+        $recruitment = Feature::query()->updateOrCreate(
+            ['product_id' => $f2->id, 'code' => 'recruitment'],
+            [
+                'name' => 'Recruitment',
+                'description' => 'Job openings, candidates and interview workflows',
+                'is_addon' => false,
+                'is_active' => true,
+                'sort_order' => 3,
+            ],
+        );
+
+        // Seed feature-linked permissions
+        $featurePermissionsMap = [
+            $recruitment->id => ['recruitment.job_opening', 'recruitment.candidates', 'recruitment.interview'],
+            $crm->id => ['crm.leads', 'crm.deals', 'crm.contacts'],
+            $analytics->id => ['analytics.reports', 'analytics.dashboard'],
+            $inventory->id => ['inventory.items', 'inventory.stock'],
+        ];
+
+        foreach ($featurePermissionsMap as $featId => $perms) {
+            foreach ($perms as $permName) {
+                foreach (['web', 'super_admin'] as $guard) {
+                    Permission::findOrCreate($permName, $guard)->update(['feature_id' => $featId]);
+                }
+            }
+        }
+
+        foreach ([$crm, $analytics, $recruitment] as $feature) {
             DB::table('company_product_feature')->updateOrInsert(
                 [
                     'company_id' => $company->id,

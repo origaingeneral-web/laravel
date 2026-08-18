@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\Company\EmployeeController;
-use App\Http\Controllers\Api\Company\ProductAddonFeatureRequestController;
-use App\Http\Controllers\Api\Company\ProductController;
-use App\Http\Controllers\Api\Company\ProductCreditController;
-use App\Http\Controllers\Api\Company\ProductFeatureController;
-use App\Http\Controllers\Api\Company\ProductPlanController;
-use App\Http\Controllers\Api\Company\ProductRenewalRequestController;
-use App\Http\Controllers\Api\Company\ProfileController;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Company\Employee\EmployeeController;
+use App\Http\Controllers\Api\Company\Product\ProductAddonFeatureRequestController;
+use App\Http\Controllers\Api\Company\Product\ProductController;
+use App\Http\Controllers\Api\Company\Product\ProductCreditController;
+use App\Http\Controllers\Api\Company\Product\ProductFeatureController;
+use App\Http\Controllers\Api\Company\Product\ProductPlanController;
+use App\Http\Controllers\Api\Company\Product\ProductRenewalRequestController;
+use App\Http\Controllers\Api\Company\Profile\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])

@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Api\Company;
 
-use App\Models\CompanyProductCreditLog;
+use App\Models\Company\CompanyProductCreditLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

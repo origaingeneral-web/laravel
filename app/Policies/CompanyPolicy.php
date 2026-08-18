@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\PermissionName;
-use App\Models\Company;
+use App\Models\Company\Company;
 use App\Models\User;
 
 class CompanyPolicy

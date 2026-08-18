@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;

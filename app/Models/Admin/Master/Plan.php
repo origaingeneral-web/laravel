@@ -2,8 +2,8 @@
 
 namespace App\Models\Admin\Master;
 
-use App\Models\CompanyProduct;
-use App\Models\Product;
+use App\Models\Company\CompanyProduct;
+use App\Models\Product\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

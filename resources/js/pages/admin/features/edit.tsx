@@ -3,7 +3,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarActions, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,13 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function Edit({ feature, products }: any) {
     const { data, setData, put, processing, errors } = useForm({
-        product_id: feature.product_id.toString(),
-        name: feature.name,
-        code: feature.code,
+        product_id: feature.product_id?.toString() || '',
+        name: feature.name || '',
         description: feature.description || '',
-        is_addon: feature.is_addon,
-        is_active: feature.is_active,
-        sort_order: feature.sort_order,
+        is_addon: !!feature.is_addon,
+        is_active: !!feature.is_active,
+        sort_order: feature.sort_order || 0,
     });
 
     const submit = (e: React.FormEvent) => {
@@ -49,7 +48,11 @@ export default function Edit({ feature, products }: any) {
 
             <Container className="pb-10">
                 <Card className="max-w-2xl mx-auto border-border/50 shadow-sm">
-                    <CardContent className="pt-6">
+                    <CardHeader>
+                        <CardTitle className="text-base font-semibold">Feature Details</CardTitle>
+                        <CardDescription>Update name and configuration for this feature.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
                         <form onSubmit={submit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2 md:col-span-2">
@@ -58,7 +61,7 @@ export default function Edit({ feature, products }: any) {
                                         onValueChange={(val) => setData('product_id', val)}
                                         value={data.product_id}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger id="product_id">
                                             <SelectValue placeholder="Select Product" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -70,7 +73,7 @@ export default function Edit({ feature, products }: any) {
                                     {errors.product_id && <p className="text-sm text-destructive">{errors.product_id}</p>}
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-2 md:col-span-2">
                                     <Label htmlFor="name">Feature Name</Label>
                                     <Input
                                         id="name"
@@ -78,16 +81,6 @@ export default function Edit({ feature, products }: any) {
                                         onChange={(e) => setData('name', e.target.value)}
                                     />
                                     {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="code">Code</Label>
-                                    <Input
-                                        id="code"
-                                        value={data.code}
-                                        onChange={(e) => setData('code', e.target.value)}
-                                    />
-                                    {errors.code && <p className="text-sm text-destructive">{errors.code}</p>}
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
@@ -107,11 +100,11 @@ export default function Edit({ feature, products }: any) {
                                         id="sort_order"
                                         type="number"
                                         value={data.sort_order}
-                                        onChange={(e) => setData('sort_order', parseInt(e.target.value))}
+                                        onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-6 md:col-span-2 mt-2">
+                                <div className="flex items-center gap-6 md:col-span-2 pt-2">
                                     <div className="flex items-center space-x-2">
                                         <Switch
                                             id="is_active"
@@ -131,7 +124,10 @@ export default function Edit({ feature, products }: any) {
                                 </div>
                             </div>
 
-                            <div className="pt-4 flex justify-end">
+                            <div className="pt-4 flex justify-end gap-3">
+                                <Button asChild variant="outline">
+                                    <Link href="/admin/features">Cancel</Link>
+                                </Button>
                                 <Button type="submit" disabled={processing} className="gap-2">
                                     <Save className="size-4" />
                                     Update Feature

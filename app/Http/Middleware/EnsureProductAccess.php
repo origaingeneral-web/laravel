@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\CompanyProduct;
+use App\Models\Company\Company;
+use App\Models\Company\CompanyProduct;
+use App\Models\Product\Product;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

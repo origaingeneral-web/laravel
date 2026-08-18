@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Admin\Setting;
+use App\Models\Admin\Setting\Setting;
+use App\Models\Company\Company;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

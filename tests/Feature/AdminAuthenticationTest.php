@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\SuperAdminSeeder;
 use Inertia\Testing\AssertableInertia as Assert;

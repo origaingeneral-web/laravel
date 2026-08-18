@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\RoleName;
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use Illuminate\Database\Seeder;
 
 class SuperAdminSeeder extends Seeder

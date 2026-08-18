@@ -1,4 +1,5 @@
 import {
+    Bot,
     BriefcaseBusiness,
     Building2,
     CreditCard,
@@ -21,6 +22,7 @@ import {
     Server,
     HardDrive,
     Cpu,
+    KeyRound,
     SlidersHorizontal,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -90,6 +92,14 @@ export const superAdminNavigation: AdminNavGroup[] = [
                 href: '/admin/features',
                 icon: Star,
                 active: ['/admin/features'],
+                guard: 'super_admin',
+                permission: 'company.view',
+            },
+            {
+                title: 'Permissions',
+                href: '/admin/permissions',
+                icon: KeyRound,
+                active: ['/admin/permissions'],
                 guard: 'super_admin',
                 permission: 'company.view',
             },
@@ -321,6 +331,22 @@ export const superAdminNavigation: AdminNavGroup[] = [
                         href: '/admin/settings/firebase',
                         icon: Flame,
                         active: ['/admin/settings/firebase'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'AI Configuration',
+                        href: '/admin/settings/ai',
+                        icon: Bot,
+                        active: ['/admin/settings/ai'],
+                        guard: 'super_admin',
+                        permission: 'admin.access',
+                    },
+                    {
+                        title: 'Location Tracking',
+                        href: '/admin/settings/location',
+                        icon: MapPin,
+                        active: ['/admin/settings/location'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },

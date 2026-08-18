@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use App\Models\User;
 
 return [

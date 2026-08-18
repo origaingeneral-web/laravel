@@ -3,6 +3,8 @@
 use App\Http\Middleware\EnsureAdminAccess;
 use App\Http\Middleware\EnsureCompanyContext;
 use App\Http\Middleware\EnsureProductAccess;
+use App\Http\Middleware\EnsureSuperAdminSecretVerified;
+use App\Http\Middleware\ExpireSuperAdminSecretOnOtherPages;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -43,10 +45,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            ExpireSuperAdminSecretOnOtherPages::class,
         ]);
 
         $middleware->alias([
             'admin.access' => EnsureAdminAccess::class,
+            'super_admin.secret' => EnsureSuperAdminSecretVerified::class,
             'company.context' => EnsureCompanyContext::class,
             'product.access' => EnsureProductAccess::class,
             'role' => RoleMiddleware::class,

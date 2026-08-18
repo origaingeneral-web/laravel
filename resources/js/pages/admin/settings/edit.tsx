@@ -8,6 +8,8 @@ import {
     CreditCard,
     Clock,
     Flame,
+    Bot,
+    MapPin,
     QrCode,
     Building2,
     ShieldCheck,
@@ -28,8 +30,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Toolbar, ToolbarActions, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -38,6 +40,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AiSettings } from './components/ai-settings';
+import { LocationSettings } from './components/location-settings';
 
 export default function Edit({ group, settings }: any) {
     // Group meta data for the header
@@ -48,6 +52,8 @@ export default function Edit({ group, settings }: any) {
         payment: { title: 'Payment Gateways & Methods', icon: <CreditCard className="size-5 text-primary" />, desc: 'Configure Top 6 payment gateways, UPI QR Code, Bank wire transfer, image uploads & verification rules.' },
         cron: { title: 'Cron Job Settings', icon: <Clock className="size-5 text-primary" />, desc: 'View server cron setup instructions and configure scheduled task behavior.' },
         firebase: { title: 'Firebase Configuration', icon: <Flame className="size-5 text-primary" />, desc: 'Configure Firebase Web API keys and project settings.' },
+        ai: { title: 'AI Model Configuration', icon: <Bot className="size-5 text-primary" />, desc: 'Configure AI engine credentials (OpenAI, Claude, Gemini, DeepSeek, Groq, Custom API). Only one active AI provider will be used across the system.' },
+        location: { title: 'Location Tracking & Google Maps', icon: <MapPin className="size-5 text-primary" />, desc: 'Configure Google Maps API keys, default map coordinates, and live GPS location tracking parameters.' },
     };
 
     const meta = groupMeta[group] || { title: 'Configuration', icon: null, desc: '' };
@@ -142,6 +148,53 @@ export default function Edit({ group, settings }: any) {
         }
         if (group === 'cron') return { cron_notification_email: '', ...settings };
         if (group === 'firebase') return { firebase_api_key: '', firebase_auth_domain: '', firebase_project_id: '', firebase_storage_bucket: '', firebase_messaging_sender_id: '', firebase_app_id: '', firebase_measurement_id: '', ...settings };
+        if (group === 'ai') {
+            return {
+                active_ai_provider: 'openai',
+                openai_api_key: '',
+                openai_model: 'gpt-4o',
+                openai_base_url: '',
+                openai_organization_id: '',
+                openai_max_tokens: '4096',
+                openai_temperature: '0.7',
+                anthropic_api_key: '',
+                anthropic_model: 'claude-3-5-sonnet-20241022',
+                anthropic_base_url: '',
+                anthropic_max_tokens: '4096',
+                gemini_api_key: '',
+                gemini_model: 'gemini-2.0-flash',
+                gemini_temperature: '0.7',
+                deepseek_api_key: '',
+                deepseek_model: 'deepseek-chat',
+                deepseek_base_url: 'https://api.deepseek.com',
+                groq_api_key: '',
+                groq_model: 'llama-3.3-70b-versatile',
+                groq_base_url: 'https://api.groq.com/openai/v1',
+                custom_ai_provider_name: 'Custom Provider',
+                custom_ai_model: '',
+                custom_ai_base_url: '',
+                custom_ai_api_key: '',
+                ...settings,
+            };
+        }
+        if (group === 'location') {
+            return {
+                google_maps_api_key: '',
+                google_geocoding_api_key: '',
+                google_places_api_key: '',
+                default_map_latitude: '28.6139',
+                default_map_longitude: '77.2090',
+                default_map_zoom: '14',
+                map_default_theme: 'roadmap',
+                location_tracking_enabled: '1',
+                tracking_interval_seconds: '15',
+                tracking_min_distance_meters: '10',
+                tracking_accuracy_mode: 'high',
+                geofence_default_radius_meters: '100',
+                auto_stop_idle_tracking: '1',
+                ...settings,
+            };
+        }
         return { ...settings };
     };
 
@@ -211,31 +264,19 @@ export default function Edit({ group, settings }: any) {
             <Container>
                 <Toolbar>
                     <ToolbarHeading title={meta.title} description={meta.desc} />
+                    {group === 'payment' && (
+                        <ToolbarActions>
+                            <Badge variant="outline" className="px-3 py-1 gap-1.5 font-medium shadow-2xs">
+                                <ShieldCheck className="size-3.5 text-emerald-500" />
+                                <span>8 Total Payment Options & QR Support</span>
+                            </Badge>
+                        </ToolbarActions>
+                    )}
                 </Toolbar>
             </Container>
 
             <Container className="pb-12">
                 <Card className="border-border/50 shadow-sm">
-                    <CardHeader className="border-b border-border/40 pb-5">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="flex items-center gap-2.5 text-xl font-bold">
-                                    {meta.icon}
-                                    {meta.title}
-                                </CardTitle>
-                                <CardDescription className="mt-1">
-                                    Configure and manage your global {group} settings.
-                                </CardDescription>
-                            </div>
-                            {group === 'payment' && (
-                                <Badge variant="outline" className="px-3 py-1 gap-1.5 font-medium">
-                                    <ShieldCheck className="size-3.5 text-emerald-500" />
-                                    <span>8 Total Payment Options & QR Support</span>
-                                </Badge>
-                            )}
-                        </div>
-                    </CardHeader>
-
                     <CardContent className="pt-6">
                         {group === 'cron' && (
                             <div className="mb-6 p-4 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm">
@@ -1452,6 +1493,16 @@ export default function Edit({ group, settings }: any) {
                                             <Input id="firebase_measurement_id" value={data.firebase_measurement_id} onChange={(e) => setData('firebase_measurement_id', e.target.value)} />
                                         </div>
                                     </div>
+                                )}
+
+                                {/* ==================== AI CONFIGURATION ==================== */}
+                                {group === 'ai' && (
+                                    <AiSettings data={data} setData={setData} />
+                                )}
+
+                                {/* ==================== LOCATION & GOOGLE MAPS CONFIGURATION ==================== */}
+                                {group === 'location' && (
+                                    <LocationSettings data={data} setData={setData} />
                                 )}
 
                                 <div className="pt-4 flex items-center justify-between border-t border-border/50 mt-8">

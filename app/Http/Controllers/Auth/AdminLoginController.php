@@ -6,7 +6,7 @@ use App\Enums\PermissionName;
 use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LoginRequest;
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

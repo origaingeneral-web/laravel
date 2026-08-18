@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\RoleName;
-use App\Models\SuperAdmin;
+use App\Models\Auth\SuperAdmin;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\SuperAdminMasterSeeder;
 use Database\Seeders\SuperAdminSeeder;

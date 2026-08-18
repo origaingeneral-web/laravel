@@ -4,6 +4,10 @@ namespace App\Models;
 
 use App\Concerns\TwoFactorAuthenticatable;
 use App\Enums\RoleName;
+use App\Models\Company\Company;
+use App\Models\Company\CompanyProduct;
+use App\Models\Product\Product;
+use App\Models\Product\UserProductAccess;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;

@@ -2,12 +2,12 @@
 
 use App\Enums\CompanyStatus;
 use App\Enums\RoleName;
-use App\Models\Company;
-use App\Models\CompanyProduct;
-use App\Models\Plan;
-use App\Models\Product;
+use App\Models\Admin\Master\Plan;
+use App\Models\Company\Company;
+use App\Models\Company\CompanyProduct;
+use App\Models\Product\Product;
+use App\Models\Product\UserProductAccess;
 use App\Models\User;
-use App\Models\UserProductAccess;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

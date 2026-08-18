@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Admin\AppAnnouncement;
+use App\Models\Admin\Notification\AppAnnouncement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'app_debug' => (bool) config('app.debug'),
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
