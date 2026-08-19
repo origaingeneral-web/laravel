@@ -2,18 +2,25 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 import {
     AlertCircle,
+    Calendar,
+    Check,
     CheckCircle2,
+    ChevronDown,
+    Clock,
     Download,
     EllipsisVertical,
     FileSpreadsheet,
     FolderPlus,
     Loader2,
+    Package,
     Plus,
     RefreshCw,
     SquarePen,
     Trash2,
     Upload,
     UploadCloud,
+    Users,
+    X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Container } from '@/components/common/container';
@@ -37,11 +44,13 @@ import * as XLSX from 'xlsx';
 type CountryLookup = { id: number; country: string };
 type StateLookup = { id: number; state: string; country_id: number };
 type CityLookup = { id: number; city: string; state_id: number };
+type ProductLookup = { id: number; name: string; code: string; description?: string };
 
 type Lookups = {
     countries?: CountryLookup[];
     states?: StateLookup[];
     cities?: CityLookup[];
+    products?: ProductLookup[];
 };
 
 type MasterRecord = Record<string, any>;
@@ -109,6 +118,10 @@ export default function MasterIndex() {
                 const ciRes = await fetch('/api/v1/admin/master/cities');
                 const ciData = await ciRes.json();
                 neededLookups.cities = ciData.data;
+            } else if (entity === 'plans') {
+                const pRes = await fetch('/api/v1/admin/master/products');
+                const pData = await pRes.json();
+                neededLookups.products = pData.data;
             }
             setLookups(neededLookups);
             
@@ -277,35 +290,68 @@ export default function MasterIndex() {
                         key: 'plan_name',
                         header: 'Plan Name',
                         sortable: true,
-                        cell: (item) => <span className="font-semibold text-foreground">{item.plan_name}</span>,
+                        cell: (item) => (
+                            <div>
+                                <span className="font-semibold text-foreground">{item.plan_name}</span>
+                                {item.remarks && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.remarks}</p>}
+                            </div>
+                        ),
                     },
                     {
-                        key: 'price',
-                        header: 'Price',
-                        sortable: true,
-                        cell: (item) => (
-                            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                                ${Number(item.price ?? 0).toFixed(2)}
-                            </span>
-                        ),
+                        key: 'products',
+                        header: 'Products, Pricing & Limits',
+                        cell: (item) => {
+                            const products = item.products || [];
+                            if (products.length > 0) {
+                                return (
+                                    <div className="flex flex-wrap gap-1.5 max-w-md">
+                                        {products.map((p: any) => (
+                                            <Badge
+                                                key={p.id}
+                                                variant="outline"
+                                                className="bg-blue-50/70 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 py-1 px-2 text-xs flex items-center gap-1.5 rounded-lg shadow-2xs"
+                                            >
+                                                <Package className="size-3 text-blue-500 shrink-0" />
+                                                <span className="font-semibold">{p.name}</span>
+                                                <span className="bg-blue-600/10 dark:bg-blue-400/20 px-1.5 py-0.5 rounded text-[11px] font-bold text-blue-800 dark:text-blue-200">
+                                                    ₹{Number(p.pivot?.price_per_user ?? 0).toFixed(2)}/user
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground font-medium bg-muted/60 px-1 py-0.5 rounded">
+                                                    {p.pivot?.staff_limit ?? item.staff_limit ?? 10} users
+                                                </span>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                );
+                            }
+                            return (
+                                <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs">
+                                    ₹{Number(item.price ?? 0).toFixed(2)}
+                                </span>
+                            );
+                        },
                     },
                     {
                         key: 'duration_in_days',
                         header: 'Duration',
                         sortable: true,
-                        cell: (item) => <span className="font-medium text-muted-foreground">{item.duration_in_days} days</span>,
-                    },
-                    {
-                        key: 'staff_limit',
-                        header: 'Staff Limit',
-                        sortable: true,
-                        cell: (item) => <span className="font-medium text-muted-foreground">{item.staff_limit} users</span>,
+                        cell: (item) => (
+                            <span className="font-medium text-foreground flex items-center gap-1.5 text-xs">
+                                <Calendar className="size-3.5 text-muted-foreground" />
+                                {item.duration_in_days} days
+                            </span>
+                        ),
                     },
                     {
                         key: 'tracking_duration',
-                        header: 'Tracking Duration',
+                        header: 'Tracking Duration (Hours/day)',
                         sortable: true,
-                        cell: (item) => <span className="font-medium text-muted-foreground">{item.tracking_duration} days</span>,
+                        cell: (item) => (
+                            <span className="font-medium text-foreground flex items-center gap-1.5 text-xs">
+                                <Clock className="size-3.5 text-muted-foreground" />
+                                {item.tracking_duration} hrs/day
+                            </span>
+                        ),
                     }
                 );
                 break;
@@ -460,11 +506,11 @@ function CreateRecordModal({
             case 'plans':
                 return {
                     plan_name: '',
-                    price: '',
-                    duration_in_days: '',
-                    staff_limit: '',
-                    tracking_duration: '',
+                    duration_in_days: 30,
+                    staff_limit: 10,
+                    tracking_duration: 24,
                     remarks: '',
+                    products: [],
                 };
             default:
                 return {};
@@ -474,6 +520,10 @@ function CreateRecordModal({
     const [data, setData] = useState<Record<string, any>>(getInitialFormData());
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleFieldChange = (key: string, value: any) => {
+        setData((prev) => ({ ...prev, [key]: value }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -505,7 +555,7 @@ function CreateRecordModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-xl' : 'sm:max-w-md'}`}>
+            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
                 <DialogHeader className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-row items-center gap-3 space-y-0 shadow-xs">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-xs">
                         <FolderPlus className="size-5" />
@@ -523,7 +573,7 @@ function CreateRecordModal({
                         <MasterFormFields
                             entity={entity}
                             data={data}
-                            setData={setData}
+                            setData={handleFieldChange}
                             errors={errors as Record<string, string>}
                             lookups={lookups}
                         />
@@ -1137,11 +1187,23 @@ function EditRecordModal({
             case 'plans':
                 return {
                     plan_name: record.plan_name ?? '',
-                    price: record.price ?? '',
                     duration_in_days: record.duration_in_days ?? '',
                     staff_limit: record.staff_limit ?? '',
                     tracking_duration: record.tracking_duration ?? '',
                     remarks: record.remarks ?? '',
+                    products: record.products?.map((p: any) => ({
+                        product_id: p.id,
+                        name: p.name,
+                        code: p.code,
+                        price_per_user: p.pivot?.price_per_user ?? 0,
+                        staff_limit: p.pivot?.staff_limit ?? record.staff_limit ?? 10,
+                    })) || (record.product_id ? [{
+                        product_id: record.product_id,
+                        name: record.product?.name ?? 'Product',
+                        code: record.product?.code ?? '',
+                        price_per_user: record.price ?? 0,
+                        staff_limit: record.staff_limit ?? 10,
+                    }] : []),
                 };
             default:
                 return {};
@@ -1151,6 +1213,10 @@ function EditRecordModal({
     const [data, setData] = useState<Record<string, any>>(getFormData());
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleFieldChange = (key: string, value: any) => {
+        setData((prev) => ({ ...prev, [key]: value }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -1181,7 +1247,7 @@ function EditRecordModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-xl' : 'sm:max-w-md'}`}>
+            <DialogContent className={`rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto [&>button[data-slot=dialog-close]]:text-white [&>button[data-slot=dialog-close]]:opacity-80 [&>button[data-slot=dialog-close]]:hover:opacity-100 [&>button[data-slot=dialog-close]]:top-4 [&>button[data-slot=dialog-close]]:end-4 ${entity === 'plans' ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
                 <DialogHeader className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-row items-center gap-3 space-y-0 shadow-xs">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-xs">
                         <SquarePen className="size-5" />
@@ -1199,7 +1265,7 @@ function EditRecordModal({
                         <MasterFormFields
                             entity={entity}
                             data={data}
-                            setData={setData}
+                            setData={handleFieldChange}
                             errors={errors as Record<string, string>}
                             lookups={lookups}
                         />
@@ -1246,14 +1312,28 @@ function DeleteRecordModal({
         record.plan_name ||
         `Record #${record.id}`;
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setDeleting(true);
-        router.delete(`/admin/master/${entity}/${record.id}`, {
-            onFinish: () => {
-                setDeleting(false);
+        try {
+            const res = await fetch(`/api/v1/admin/master/${entity}/${record.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+            if (res.ok) {
+                onSuccess();
                 onClose();
-            },
-        });
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.message || 'Failed to delete record.');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('An unexpected error occurred while deleting.');
+        } finally {
+            setDeleting(false);
+        }
     };
 
     return (
@@ -1574,95 +1654,338 @@ function MasterFormFields({
                             id="plan_name"
                             value={data.plan_name || ''}
                             onChange={(e) => setData('plan_name', e.target.value)}
-                            placeholder="e.g. Basic, Premium, Enterprise"
+                            placeholder="e.g. Starter Pack, Growth Suite, Enterprise Unlimited"
                             className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
                             required
                         />
                         {errors.plan_name && <p className="mt-1.5 text-xs font-medium text-destructive">{errors.plan_name}</p>}
                     </div>
-                    <div className="grid grid-cols-2 gap-3.5">
-                        <div>
-                            <Label htmlFor="price" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                Price ($) <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="price"
-                                type="number"
-                                step="0.01"
-                                value={data.price ?? ''}
-                                onChange={(e) => setData('price', e.target.value)}
-                                placeholder="0.00"
-                                className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
-                                required
-                            />
-                            {errors.price && <p className="mt-1.5 text-xs font-medium text-destructive">{errors.price}</p>}
-                        </div>
-                        <div>
-                            <Label htmlFor="duration_in_days" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                Duration (Days) <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="duration_in_days"
-                                type="number"
-                                value={data.duration_in_days ?? ''}
-                                onChange={(e) => setData('duration_in_days', e.target.value)}
-                                placeholder="30"
-                                className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
-                                required
-                            />
-                            {errors.duration_in_days && (
-                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.duration_in_days}</p>
-                            )}
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3.5">
-                        <div>
-                            <Label htmlFor="staff_limit" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                Staff Limit <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="staff_limit"
-                                type="number"
-                                value={data.staff_limit ?? ''}
-                                onChange={(e) => setData('staff_limit', e.target.value)}
-                                placeholder="10"
-                                className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
-                                required
-                            />
-                            {errors.staff_limit && <p className="mt-1.5 text-xs font-medium text-destructive">{errors.staff_limit}</p>}
-                        </div>
-                        <div>
-                            <Label htmlFor="tracking_duration" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                Tracking Duration (Days) <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="tracking_duration"
-                                type="number"
-                                value={data.tracking_duration ?? ''}
-                                onChange={(e) => setData('tracking_duration', e.target.value)}
-                                placeholder="90"
-                                className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
-                                required
-                            />
-                            {errors.tracking_duration && (
-                                <p className="mt-1.5 text-xs font-medium text-destructive">{errors.tracking_duration}</p>
-                            )}
+
+                    <PlanProductsSection
+                        productsLookup={lookups.products}
+                        selectedProducts={data.products || []}
+                        onChange={(prods) => setData('products', prods)}
+                        errors={errors}
+                    />
+
+                    <div className="pt-1 border-t border-border/60">
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-2">
+                            Shared Plan Settings (Applies to all products)
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label htmlFor="duration_in_days" className="text-xs font-medium text-muted-foreground">
+                                    Duration (Days) <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="relative mt-1">
+                                    <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                                    <Input
+                                        id="duration_in_days"
+                                        type="number"
+                                        min="1"
+                                        value={data.duration_in_days ?? ''}
+                                        onChange={(e) => setData('duration_in_days', e.target.value)}
+                                        placeholder="30"
+                                        className="h-9 pl-8 rounded-lg bg-muted/20 focus:bg-background text-xs"
+                                        required
+                                    />
+                                </div>
+                                {errors.duration_in_days && (
+                                    <p className="mt-1 text-[11px] font-medium text-destructive">{errors.duration_in_days}</p>
+                                )}
+                            </div>
+                            <div>
+                                <Label htmlFor="tracking_duration" className="text-xs font-medium text-muted-foreground">
+                                    Tracking Duration (Hours/day) <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="relative mt-1">
+                                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                                    <Input
+                                        id="tracking_duration"
+                                        type="number"
+                                        min="1"
+                                        max="24"
+                                        value={data.tracking_duration ?? ''}
+                                        onChange={(e) => setData('tracking_duration', e.target.value)}
+                                        placeholder="24"
+                                        className="h-9 pl-8 rounded-lg bg-muted/20 focus:bg-background text-xs"
+                                        required
+                                    />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground mt-0.5 block">Max 24 hrs/day</span>
+                                {errors.tracking_duration && (
+                                    <p className="mt-1 text-[11px] font-medium text-destructive">{errors.tracking_duration}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
+
                     <div>
                         <Label htmlFor="remarks" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                            Remarks
+                            Remarks / Notes
                         </Label>
                         <Input
                             id="remarks"
                             value={data.remarks || ''}
                             onChange={(e) => setData('remarks', e.target.value)}
-                            placeholder="Optional notes or plan features"
-                            className="mt-1.5 h-10 rounded-lg bg-muted/20 focus:bg-background"
+                            placeholder="Optional notes or plan features summary"
+                            className="mt-1.5 h-9 rounded-lg bg-muted/20 focus:bg-background text-xs"
                         />
-                        {errors.remarks && <p className="mt-1.5 text-xs font-medium text-destructive">{errors.remarks}</p>}
+                        {errors.remarks && <p className="mt-1 text-xs font-medium text-destructive">{errors.remarks}</p>}
                     </div>
                 </>
+            )}
+        </div>
+    );
+}
+
+function PlanProductsSection({
+    productsLookup,
+    selectedProducts,
+    onChange,
+    errors,
+}: {
+    productsLookup?: ProductLookup[];
+    selectedProducts: Array<{ product_id: number; name: string; code: string; price_per_user: number | string; staff_limit?: number | string }>;
+    onChange: (products: Array<{ product_id: number; name: string; code: string; price_per_user: number | string; staff_limit?: number | string }>) => void;
+    errors: Record<string, string>;
+}) {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [search, setSearch] = useState('');
+
+    const filtered = (productsLookup || []).filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase()) || p.code.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const toggleProduct = (product: ProductLookup) => {
+        const exists = selectedProducts.some((p) => p.product_id === product.id);
+        if (exists) {
+            onChange(selectedProducts.filter((p) => p.product_id !== product.id));
+        } else {
+            onChange([...selectedProducts, { product_id: product.id, name: product.name, code: product.code, price_per_user: 0, staff_limit: 10 }]);
+        }
+    };
+
+    const updatePrice = (productId: number, price: string) => {
+        onChange(
+            selectedProducts.map((p) =>
+                p.product_id === productId ? { ...p, price_per_user: price } : p
+            )
+        );
+    };
+
+    const updateStaffLimit = (productId: number, limit: string) => {
+        onChange(
+            selectedProducts.map((p) =>
+                p.product_id === productId ? { ...p, staff_limit: limit } : p
+            )
+        );
+    };
+
+    const removeProduct = (productId: number) => {
+        onChange(selectedProducts.filter((p) => p.product_id !== productId));
+    };
+
+    const selectAll = () => {
+        const all = (productsLookup || []).map((p) => {
+            const existing = selectedProducts.find((sp) => sp.product_id === p.id);
+            return existing || { product_id: p.id, name: p.name, code: p.code, price_per_user: 0, staff_limit: 10 };
+        });
+        onChange(all);
+    };
+
+    const clearAll = () => {
+        onChange([]);
+    };
+
+    const totalPerUser = selectedProducts.reduce((sum, p) => sum + (Number(p.price_per_user) || 0), 0);
+
+    return (
+        <div className="space-y-3">
+            <div>
+                <div className="flex items-center justify-between mb-1.5">
+                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <Package className="size-3.5 text-blue-500" />
+                        <span>Select Products</span>
+                        <span className="text-destructive">*</span>
+                    </Label>
+                    {productsLookup && productsLookup.length > 0 && (
+                        <div className="flex items-center gap-2 text-xs">
+                            <button
+                                type="button"
+                                onClick={selectAll}
+                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer text-[11px]"
+                            >
+                                Select All
+                            </button>
+                            <span className="text-muted-foreground text-[11px]">•</span>
+                            <button
+                                type="button"
+                                onClick={clearAll}
+                                className="text-muted-foreground hover:text-destructive font-medium cursor-pointer text-[11px]"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Multi-select Dropdown Trigger */}
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => setDropdownOpen((prev) => !prev)}
+                        className="flex h-10 w-full items-center justify-between rounded-lg border border-input bg-muted/20 px-3 py-2 text-sm transition-all hover:bg-muted/30 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                    >
+                        <div className="flex items-center gap-2 overflow-hidden text-left">
+                            <Package className="size-4 text-muted-foreground shrink-0" />
+                            {selectedProducts.length === 0 ? (
+                                <span className="text-muted-foreground text-xs">Choose products for this plan (multi-select)...</span>
+                            ) : (
+                                <div className="flex items-center gap-1.5 overflow-hidden">
+                                    <span className="font-semibold text-xs text-blue-600 dark:text-blue-400 shrink-0">
+                                        {selectedProducts.length} selected:
+                                    </span>
+                                    <span className="font-medium text-xs text-foreground truncate">
+                                        {selectedProducts.map((p) => p.name).join(', ')}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <ChevronDown className={`size-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-2 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {dropdownOpen && (
+                        <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-popover p-2 shadow-xl backdrop-blur-md">
+                            <Input
+                                placeholder="Search products by name or code..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="h-8 text-xs mb-2 bg-muted/30"
+                                autoFocus
+                            />
+                            <div className="max-h-48 overflow-y-auto space-y-1">
+                                {filtered.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground text-center py-3">No products found.</p>
+                                ) : (
+                                    filtered.map((prod) => {
+                                        const isSelected = selectedProducts.some((p) => p.product_id === prod.id);
+                                        return (
+                                            <div
+                                                key={prod.id}
+                                                onClick={() => toggleProduct(prod)}
+                                                className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition-colors ${
+                                                    isSelected
+                                                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-medium'
+                                                        : 'hover:bg-muted/50 text-foreground'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div
+                                                        className={`size-4 rounded flex items-center justify-center border transition-colors ${
+                                                            isSelected
+                                                                ? 'bg-blue-600 border-blue-600 text-white'
+                                                                : 'border-muted-foreground/30'
+                                                        }`}
+                                                    >
+                                                        {isSelected && <Check className="size-3 stroke-[3]" />}
+                                                    </div>
+                                                    <span className="font-medium">{prod.name}</span>
+                                                </div>
+                                                <span className="text-[10px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded">
+                                                    {prod.code}
+                                                </span>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                {errors.products && <p className="mt-1 text-xs font-medium text-destructive">{errors.products}</p>}
+            </div>
+
+            {/* Product-wise Per User Pricing & Staff Limits */}
+            {selectedProducts.length > 0 ? (
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <span>Product-wise Pricing & User Limits</span>
+                        </Label>
+                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                            Total Per User: ₹{totalPerUser.toFixed(2)}
+                        </span>
+                    </div>
+                    <div className="divide-y divide-border/60 rounded-xl border border-border/80 bg-muted/10 overflow-hidden shadow-2xs">
+                        {selectedProducts.map((sp) => (
+                            <div key={sp.product_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 bg-card/60 hover:bg-muted/20 transition-colors">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="size-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                                        <Package className="size-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-xs font-semibold text-foreground truncate">{sp.name}</div>
+                                        <div className="text-[10px] text-muted-foreground font-mono">{sp.code}</div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 shrink-0">
+                                    {/* Per user cost in INR */}
+                                    <div className="flex items-center gap-1.5">
+                                        <Label className="text-[11px] text-muted-foreground whitespace-nowrap">Price:</Label>
+                                        <div className="relative w-28">
+                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">₹</span>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={sp.price_per_user ?? ''}
+                                                onChange={(e) => updatePrice(sp.product_id, e.target.value)}
+                                                placeholder="0.00"
+                                                className="h-8 pl-6 pr-2 text-xs font-semibold text-right rounded-lg bg-background"
+                                                required
+                                            />
+                                        </div>
+                                        <span className="text-[11px] text-muted-foreground font-medium">/user</span>
+                                    </div>
+
+                                    {/* Product-wise Staff Limit */}
+                                    <div className="flex items-center gap-1.5">
+                                        <Label className="text-[11px] text-muted-foreground whitespace-nowrap">Limit:</Label>
+                                        <div className="relative w-24">
+                                            <Users className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                value={sp.staff_limit ?? ''}
+                                                onChange={(e) => updateStaffLimit(sp.product_id, e.target.value)}
+                                                placeholder="10"
+                                                className="h-8 pl-6 pr-2 text-xs font-semibold text-right rounded-lg bg-background"
+                                                required
+                                            />
+                                        </div>
+                                        <span className="text-[11px] text-muted-foreground font-medium">users</span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => removeProduct(sp.product_id)}
+                                        className="size-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer ml-1"
+                                        title="Remove product"
+                                    >
+                                        <X className="size-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="rounded-xl border border-dashed border-border/80 p-4 text-center bg-muted/10">
+                    <Package className="size-6 text-muted-foreground mx-auto mb-1.5 opacity-50" />
+                    <p className="text-xs text-muted-foreground">Select one or more products above to configure product-wise per-user pricing and user limits.</p>
+                </div>
             )}
         </div>
     );

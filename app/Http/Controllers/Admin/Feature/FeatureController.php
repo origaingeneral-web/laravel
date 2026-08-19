@@ -52,10 +52,13 @@ class FeatureController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_addon' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer',
         ]);
         $data['sort_order'] = $data['sort_order'] ?? 0;
+        $isAddon = (bool) ($data['is_addon'] ?? false);
+        $data['price'] = $isAddon ? (float) ($data['price'] ?? 0.00) : 0.00;
 
         // Auto-generate unique code slug from name
         $baseSlug = Str::slug($data['name'], '_');
@@ -92,12 +95,15 @@ class FeatureController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_addon' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer',
         ]);
         if (! isset($data['sort_order'])) {
             unset($data['sort_order']);
         }
+        $isAddon = (bool) ($data['is_addon'] ?? false);
+        $data['price'] = $isAddon ? (float) ($data['price'] ?? 0.00) : 0.00;
 
         // If name changed, generate clean slug
         if ($feature->name !== $data['name']) {

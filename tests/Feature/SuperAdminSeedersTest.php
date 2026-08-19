@@ -30,6 +30,6 @@ test('super admin master seeder creates lookup data', function () {
     $this->assertDatabaseHas('states', ['state' => 'Maharashtra', 'code' => 'MH']);
     $this->assertDatabaseHas('cities', ['city' => 'Mumbai', 'is_top_city' => 1]);
     $this->assertDatabaseHas('areas', ['area' => 'Andheri East', 'zipcode' => '400069']);
-    $this->assertDatabaseHas('products', ['name' => 'F2 Super', 'code' => 'f2_super']);
-    $this->assertDatabaseHas('plans', ['plan_name' => 'F2 Starter', 'staff_limit' => 25]);
+    $this->assertDatabaseHas('products', ['name' => 'Flash Force', 'code' => 'flash_force']);
+    $this->assertDatabaseHas('plans', ['plan_name' => 'Flash Starter', 'staff_limit' => 20]);
 });

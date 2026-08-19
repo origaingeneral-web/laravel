@@ -29,6 +29,7 @@ import {
   HelpCircle,
   Kanban,
   Key,
+  KeyRound,
   Layout,
   LayoutGrid,
   LifeBuoy,
@@ -65,7 +66,7 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Dark Sidebar', path: '/dark-sidebar' },
     ],
   },
-  { heading: 'Master' },
+  { heading: 'Master Management' },
   {
     title: 'Master',
     icon: Database,
@@ -78,6 +79,16 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Areas', path: '/admin/master/areas' },
       { title: 'Plans', path: '/admin/master/plans' },
     ],
+  },
+  {
+    title: 'Features',
+    icon: Star,
+    path: '/admin/features',
+  },
+  {
+    title: 'Permissions',
+    icon: KeyRound,
+    path: '/admin/permissions',
   },
   { heading: 'User' },
   {

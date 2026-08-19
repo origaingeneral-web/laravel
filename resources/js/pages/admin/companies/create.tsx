@@ -10,7 +10,9 @@ import {
     ChevronRight,
     ChevronLeft,
     UploadCloud,
-    ArrowLeft
+    ArrowLeft,
+    Send,
+    Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +27,6 @@ import {
     StepperItem,
     StepperTrigger,
     StepperIndicator,
-    StepperSeparator,
     StepperTitle,
     StepperDescription,
     StepperPanel,
@@ -53,13 +54,21 @@ export default function Create({ lookups, statusOptions }: any) {
         admin_email: '', // Username (Email Id)
         admin_password: '', // Password
         calling_pin_code: '',
-        create_admin: true, // Hidden field to trigger admin creation
+        create_admin: true,
 
-        // 3. Owner Details
+        // 3. Allot Plan (Now Step 3)
+        main_branch: 'Flash Force',
+        plan_id: '',
+        active_from: new Date().toISOString().split('T')[0],
+        active_to: '',
+        received_amount: '',
+        number_of_branch: '',
+
+        // 4. Owner Details (Now Step 4 - Optional)
         owner_name: '',
         owner_mobile: '',
 
-        // 4. Document Details
+        // 5. Document Details (Now Step 5 - Optional)
         profile_picture: null as File | null,
         document_number: '', // PAN Number
         id_type: '',
@@ -68,17 +77,30 @@ export default function Create({ lookups, statusOptions }: any) {
         address_proof: null as File | null,
         remark: '',
         status: 1,
-
-        // 5. Allot Plan
-        main_branch: '',
-        plan_id: '',
-        active_from: '',
-        active_to: '',
-        received_amount: '',
-        number_of_branch: '',
     });
 
     const [activeStep, setActiveStep] = useState(1);
+
+    const handlePlanChange = (selectedPlanId: string) => {
+        setData((prev) => {
+            const plan = lookups?.plans?.find((p: any) => String(p.id) === String(selectedPlanId));
+            if (!plan) {
+                return { ...prev, plan_id: selectedPlanId };
+            }
+
+            const fromDate = prev.active_from ? new Date(prev.active_from) : new Date();
+            const toDate = new Date(fromDate);
+            toDate.setDate(toDate.getDate() + (Number(plan.duration_in_days) || 30));
+
+            return {
+                ...prev,
+                plan_id: selectedPlanId,
+                received_amount: plan.price ? String(plan.price) : prev.received_amount,
+                number_of_branch: plan.staff_limit ? String(plan.staff_limit) : prev.number_of_branch,
+                active_to: toDate.toISOString().split('T')[0],
+            };
+        });
+    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -103,7 +125,7 @@ export default function Create({ lookups, statusOptions }: any) {
                 <Toolbar>
                     <ToolbarHeading
                         title="Add Company"
-                        description="Follow the 5-step wizard to set up a new company profile."
+                        description="Quickly set up a new company. You can submit directly after selecting a plan in Step 3 or add more details."
                     />
                     <ToolbarActions>
                         <Button asChild variant="outline" className="gap-2">
@@ -129,9 +151,9 @@ export default function Create({ lookups, statusOptions }: any) {
                                 {[
                                     { step: 1, title: 'Company', desc: 'Basic info', icon: Building2 },
                                     { step: 2, title: 'Login', desc: 'Access credentials', icon: KeyRound },
-                                    { step: 3, title: 'Owner', desc: 'Primary contact', icon: User },
-                                    { step: 4, title: 'Documents', desc: 'KYC & files', icon: FileText },
-                                    { step: 5, title: 'Plan', desc: 'Subscription setup', icon: CreditCard },
+                                    { step: 3, title: 'Plan', desc: 'Subscription setup', icon: CreditCard },
+                                    { step: 4, title: 'Owner', desc: 'Optional details', icon: User },
+                                    { step: 5, title: 'Documents', desc: 'KYC & files (Optional)', icon: FileText },
                                 ].map((s) => (
                                     <StepperItem key={s.step} step={s.step} className="flex-1 min-w-[150px]">
                                         <StepperTrigger className="w-full flex items-center justify-start gap-4 p-3 rounded-xl transition-all data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-border hover:bg-muted/50">
@@ -169,6 +191,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     onChange={(e) => setData('company_name', e.target.value)}
                                                     placeholder="Enter Name Of Company"
                                                     className="bg-muted/20"
+                                                    required
                                                 />
                                                 <p className="text-[11px] text-muted-foreground">Don't use special characters.</p>
                                                 {errors.company_name && <p className="text-sm text-destructive">{errors.company_name}</p>}
@@ -176,13 +199,12 @@ export default function Create({ lookups, statusOptions }: any) {
                                             <div className="space-y-2">
                                                 <Label htmlFor="business_category_id">Business Category <span className="text-destructive">*</span></Label>
                                                 <Select value={data.business_category_id} onValueChange={(v) => setData('business_category_id', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select category" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select Category" /></SelectTrigger>
                                                     <SelectContent>
                                                         {lookups?.businessCategories?.map((cat: any) => (
                                                             <SelectItem key={cat.id} value={String(cat.id)}>{cat.category}</SelectItem>
                                                         ))}
-                                                        {/* Fallback for empty lookups during dev */}
-                                                        {!lookups?.businessCategories?.length && <SelectItem value="1">Default Category</SelectItem>}
+                                                        {!lookups?.businessCategories?.length && <SelectItem value="1">General Business</SelectItem>}
                                                     </SelectContent>
                                                 </Select>
                                                 {errors.business_category_id && <p className="text-sm text-destructive">{errors.business_category_id}</p>}
@@ -195,6 +217,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     onChange={(e) => setData('mobile', e.target.value)}
                                                     placeholder="Enter Mobile Number Of Company"
                                                     className="bg-muted/20"
+                                                    required
                                                 />
                                                 {errors.mobile && <p className="text-sm text-destructive">{errors.mobile}</p>}
                                             </div>
@@ -207,6 +230,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     onChange={(e) => setData('email', e.target.value)}
                                                     placeholder="Enter Email ID Of Company"
                                                     className="bg-muted/20"
+                                                    required
                                                 />
                                                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                             </div>
@@ -228,13 +252,14 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     onChange={(e) => setData('address', e.target.value)}
                                                     placeholder="Enter Address Of Company"
                                                     className="bg-muted/20 min-h-[100px]"
+                                                    required
                                                 />
                                                 {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="country_id">Country <span className="text-destructive">*</span></Label>
                                                 <Select value={data.country_id} onValueChange={(v) => setData('country_id', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select Country" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select Country" /></SelectTrigger>
                                                     <SelectContent>
                                                         {lookups?.countries?.map((c: any) => (
                                                             <SelectItem key={c.id} value={String(c.id)}>{c.country}</SelectItem>
@@ -242,6 +267,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                         {!lookups?.countries?.length && <SelectItem value="1">India</SelectItem>}
                                                     </SelectContent>
                                                 </Select>
+                                                {errors.country_id && <p className="text-sm text-destructive">{errors.country_id}</p>}
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="state_id">State <span className="text-destructive">*</span></Label>
@@ -251,26 +277,28 @@ export default function Create({ lookups, statusOptions }: any) {
                                                         {lookups?.states?.map((s: any) => (
                                                             <SelectItem key={s.id} value={String(s.id)}>{s.state}</SelectItem>
                                                         ))}
-                                                        {!lookups?.states?.length && <SelectItem value="1">Gujarat</SelectItem>}
+                                                        {!lookups?.states?.length && <SelectItem value="1">State 1</SelectItem>}
                                                     </SelectContent>
                                                 </Select>
+                                                {errors.state_id && <p className="text-sm text-destructive">{errors.state_id}</p>}
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="city_id">City <span className="text-destructive">*</span></Label>
                                                 <Select value={data.city_id} onValueChange={(v) => setData('city_id', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select city" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select City" /></SelectTrigger>
                                                     <SelectContent>
                                                         {lookups?.cities?.map((c: any) => (
                                                             <SelectItem key={c.id} value={String(c.id)}>{c.city}</SelectItem>
                                                         ))}
-                                                        {!lookups?.cities?.length && <SelectItem value="1">Ahmedabad</SelectItem>}
+                                                        {!lookups?.cities?.length && <SelectItem value="1">City 1</SelectItem>}
                                                     </SelectContent>
                                                 </Select>
+                                                {errors.city_id && <p className="text-sm text-destructive">{errors.city_id}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="area_id">Area <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="area_id">Area</Label>
                                                 <Select value={data.area_id} onValueChange={(v) => setData('area_id', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select area" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select Area" /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="1">Default Area</SelectItem>
                                                     </SelectContent>
@@ -284,6 +312,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     onChange={(e) => setData('pincode', e.target.value)}
                                                     placeholder="Enter Pincode Of Area"
                                                     className="bg-muted/20"
+                                                    required
                                                 />
                                                 {errors.pincode && <p className="text-sm text-destructive">{errors.pincode}</p>}
                                             </div>
@@ -303,46 +332,44 @@ export default function Create({ lookups, statusOptions }: any) {
                                         </div>
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <div className="space-y-2">
-                                                <Label htmlFor="company_code">Company Code <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="company_code">Company Code</Label>
                                                 <Input
                                                     id="company_code"
                                                     value={data.company_code}
                                                     onChange={(e) => setData('company_code', e.target.value)}
-                                                    placeholder="DOZF"
+                                                    placeholder="Auto-generated if empty"
                                                     maxLength={4}
                                                     className="bg-muted/20 font-mono text-lg tracking-widest uppercase"
                                                 />
-                                                <p className="text-[11px] text-muted-foreground">Max 4 Characters</p>
+                                                <p className="text-[11px] text-muted-foreground">Optional 4-letter unique identifier</p>
                                                 {errors.company_code && <p className="text-sm text-destructive">{errors.company_code}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="admin_email">Username (Email Id) <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="admin_email">Admin Username (Email Id)</Label>
                                                 <Input
                                                     id="admin_email"
                                                     type="email"
                                                     value={data.admin_email}
                                                     onChange={(e) => setData('admin_email', e.target.value)}
-                                                    placeholder="Enter User Name For Login"
+                                                    placeholder="e.g., admin@company.com"
                                                     className="bg-muted/20"
                                                 />
                                                 {errors.admin_email && <p className="text-sm text-destructive">{errors.admin_email}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="admin_password">Password <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="admin_password">Admin Password</Label>
                                                 <Input
                                                     id="admin_password"
                                                     type="text"
                                                     value={data.admin_password}
                                                     onChange={(e) => setData('admin_password', e.target.value)}
-                                                    placeholder="630097"
-                                                    maxLength={6}
+                                                    placeholder="Default: 123456"
                                                     className="bg-muted/20 font-mono tracking-widest"
                                                 />
-                                                <p className="text-[11px] text-muted-foreground">Max 6 Characters</p>
                                                 {errors.admin_password && <p className="text-sm text-destructive">{errors.admin_password}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="calling_pin_code">Calling Pin Code <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="calling_pin_code">Calling Pin Code</Label>
                                                 <Input
                                                     id="calling_pin_code"
                                                     value={data.calling_pin_code}
@@ -351,42 +378,143 @@ export default function Create({ lookups, statusOptions }: any) {
                                                     maxLength={5}
                                                     className="bg-muted/20 font-mono tracking-widest"
                                                 />
-                                                <p className="text-[11px] text-muted-foreground">Max 5 Characters i.e. To Reset Password , Users Addon etc.</p>
+                                                <p className="text-[11px] text-muted-foreground">Max 5 characters (Used for support & password reset verification)</p>
                                                 {errors.calling_pin_code && <p className="text-sm text-destructive">{errors.calling_pin_code}</p>}
                                             </div>
                                         </div>
                                     </div>
                                 </StepperContent>
 
-                                {/* STEP 3: Owner Details */}
+                                {/* STEP 3: Allot Plan (Now Step 3 with direct Submit option) */}
                                 <StepperContent value={3}>
+                                    <div className="space-y-6">
+                                        <div className="border-b pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                            <div>
+                                                <h2 className="text-xl font-semibold flex items-center gap-2">
+                                                    <CreditCard className="text-primary size-5" />
+                                                    3. Allot Plan & Subscription
+                                                </h2>
+                                                <p className="text-sm text-muted-foreground mt-1">
+                                                    Assign software subscription plan and limits. You can submit now or proceed to add owner & KYC details.
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                                                <Sparkles className="size-3.5" /> Ready for Immediate Submission
+                                            </div>
+                                        </div>
+                                        <div className="grid gap-6 sm:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="plan_id">Select Plan <span className="text-destructive">*</span></Label>
+                                                <Select value={data.plan_id} onValueChange={handlePlanChange}>
+                                                    <SelectTrigger className="bg-muted/20">
+                                                        <SelectValue placeholder="Choose a subscription plan" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {lookups?.plans?.map((p: any) => (
+                                                            <SelectItem key={p.id} value={String(p.id)}>
+                                                                {p.plan_name} ({p.duration_in_days} Days) - ₹{p.price} (Staff Limit: {p.staff_limit})
+                                                            </SelectItem>
+                                                        ))}
+                                                        {!lookups?.plans?.length && (
+                                                            <>
+                                                                <SelectItem value="1">Standard Plan (30 Days)</SelectItem>
+                                                                <SelectItem value="2">Enterprise Plan (365 Days)</SelectItem>
+                                                            </>
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                                {errors.plan_id && <p className="text-sm text-destructive">{errors.plan_id}</p>}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="main_branch">Main Branch Name</Label>
+                                                <Input
+                                                    id="main_branch"
+                                                    value={data.main_branch}
+                                                    onChange={(e) => setData('main_branch', e.target.value)}
+                                                    placeholder="Main Head Office"
+                                                    className="bg-muted/20"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="active_from">Subscription Start Date</Label>
+                                                <Input
+                                                    id="active_from"
+                                                    type="date"
+                                                    value={data.active_from}
+                                                    onChange={(e) => setData('active_from', e.target.value)}
+                                                    className="bg-muted/20"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="active_to">Subscription Expiry Date</Label>
+                                                <Input
+                                                    id="active_to"
+                                                    type="date"
+                                                    value={data.active_to}
+                                                    onChange={(e) => setData('active_to', e.target.value)}
+                                                    className="bg-muted/20"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="received_amount">Received Amount (₹)</Label>
+                                                <Input
+                                                    id="received_amount"
+                                                    type="number"
+                                                    value={data.received_amount}
+                                                    onChange={(e) => setData('received_amount', e.target.value)}
+                                                    placeholder="0.00"
+                                                    className="bg-muted/20"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="number_of_branch">Staff / Branch Limit</Label>
+                                                <Input
+                                                    id="number_of_branch"
+                                                    type="number"
+                                                    value={data.number_of_branch}
+                                                    onChange={(e) => setData('number_of_branch', e.target.value)}
+                                                    placeholder="e.g., 10"
+                                                    className="bg-muted/20"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </StepperContent>
+
+                                {/* STEP 4: Owner Details (Optional) */}
+                                <StepperContent value={4}>
                                     <div className="space-y-6">
                                         <div className="border-b pb-4">
                                             <h2 className="text-xl font-semibold flex items-center gap-2">
                                                 <User className="text-primary size-5" />
-                                                3. Owner Details
+                                                4. Owner Details <span className="text-xs font-normal text-muted-foreground">(Optional)</span>
                                             </h2>
-                                            <p className="text-sm text-muted-foreground mt-1">Contact information for the company owner.</p>
+                                            <p className="text-sm text-muted-foreground mt-1">Contact information for the company owner or key stakeholder.</p>
                                         </div>
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <div className="space-y-2">
-                                                <Label htmlFor="owner_name">Owner Name <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="owner_name">Owner Name</Label>
                                                 <Input
                                                     id="owner_name"
                                                     value={data.owner_name}
                                                     onChange={(e) => setData('owner_name', e.target.value)}
-                                                    placeholder="Enter Name Of Owner"
+                                                    placeholder="Defaults to Company Name if empty"
                                                     className="bg-muted/20"
                                                 />
                                                 {errors.owner_name && <p className="text-sm text-destructive">{errors.owner_name}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="owner_mobile">Owner Mobile Number <span className="text-destructive">*</span></Label>
+                                                <Label htmlFor="owner_mobile">Owner Mobile Number</Label>
                                                 <Input
                                                     id="owner_mobile"
                                                     value={data.owner_mobile}
                                                     onChange={(e) => setData('owner_mobile', e.target.value)}
-                                                    placeholder="Enter Mobile Number Of Owner"
+                                                    placeholder="Defaults to Company Mobile if empty"
                                                     className="bg-muted/20"
                                                 />
                                                 {errors.owner_mobile && <p className="text-sm text-destructive">{errors.owner_mobile}</p>}
@@ -395,15 +523,15 @@ export default function Create({ lookups, statusOptions }: any) {
                                     </div>
                                 </StepperContent>
 
-                                {/* STEP 4: Document Details */}
-                                <StepperContent value={4}>
+                                {/* STEP 5: Document Details (Optional) */}
+                                <StepperContent value={5}>
                                     <div className="space-y-6">
                                         <div className="border-b pb-4">
                                             <h2 className="text-xl font-semibold flex items-center gap-2">
                                                 <FileText className="text-primary size-5" />
-                                                4. Document Details
+                                                5. Document Details <span className="text-xs font-normal text-muted-foreground">(Optional)</span>
                                             </h2>
-                                            <p className="text-sm text-muted-foreground mt-1">Upload necessary KYC documentation.</p>
+                                            <p className="text-sm text-muted-foreground mt-1">Upload KYC documentation, proofs, and remarks.</p>
                                         </div>
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <div className="space-y-2">
@@ -418,7 +546,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                                         {data.profile_picture ? data.profile_picture.name : 'No file chosen'}
                                                     </span>
                                                 </div>
-                                                <p className="text-[11px] text-muted-foreground">Either owner's photo or Shop's photo</p>
+                                                <p className="text-[11px] text-muted-foreground">Owner photo or logo image</p>
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="document_number">PAN Number</Label>
@@ -433,7 +561,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                             <div className="space-y-2">
                                                 <Label htmlFor="id_type">ID Type</Label>
                                                 <Select value={data.id_type} onValueChange={(v) => setData('id_type', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select id type" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select ID Type" /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="Aadhaar">Aadhaar Card</SelectItem>
                                                         <SelectItem value="Voter ID">Voter ID</SelectItem>
@@ -457,7 +585,7 @@ export default function Create({ lookups, statusOptions }: any) {
                                             <div className="space-y-2">
                                                 <Label htmlFor="address_type">Address Type</Label>
                                                 <Select value={data.address_type} onValueChange={(v) => setData('address_type', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select id type" /></SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select Address Proof Type" /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="Electricity Bill">Electricity Bill</SelectItem>
                                                         <SelectItem value="Rent Agreement">Rent Agreement</SelectItem>
@@ -478,107 +606,21 @@ export default function Create({ lookups, statusOptions }: any) {
                                                 </div>
                                             </div>
                                             <div className="space-y-2 sm:col-span-2">
-                                                <Label htmlFor="remark">Any Remark</Label>
+                                                <Label htmlFor="remark">Remarks</Label>
                                                 <Textarea
                                                     id="remark"
                                                     value={data.remark}
                                                     onChange={(e) => setData('remark', e.target.value)}
-                                                    placeholder="Remark If Any"
+                                                    placeholder="Any additional notes or instructions"
                                                     className="bg-muted/20 min-h-[80px]"
                                                 />
                                             </div>
-                                            <div className="space-y-2 sm:col-span-2">
-                                                <Label htmlFor="status">Status <span className="text-destructive">*</span></Label>
-                                                <Select value={String(data.status)} onValueChange={(v) => setData('status', Number(v))}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="select status" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="1">Active</SelectItem>
-                                                        <SelectItem value="2">Inactive</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
                                         </div>
                                     </div>
                                 </StepperContent>
 
-                                {/* STEP 5: Allot Plan */}
-                                <StepperContent value={5}>
-                                    <div className="space-y-6">
-                                        <div className="border-b pb-4">
-                                            <h2 className="text-xl font-semibold flex items-center gap-2">
-                                                <CreditCard className="text-primary size-5" />
-                                                5. Allot Plan
-                                            </h2>
-                                            <p className="text-sm text-muted-foreground mt-1">Assign software subscription limits and active dates.</p>
-                                        </div>
-                                        <div className="grid gap-6 sm:grid-cols-2">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="main_branch">Select Main Branch</Label>
-                                                <Select value={data.main_branch} onValueChange={(v) => setData('main_branch', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Flash Force" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Flash Force">Flash Force</SelectItem>
-                                                        <SelectItem value="Branch 2">Branch 2</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="plan_id">Plan</Label>
-                                                <Select value={data.plan_id} onValueChange={(v) => setData('plan_id', v)}>
-                                                    <SelectTrigger className="bg-muted/20"><SelectValue placeholder="Select Plan" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="1">Basic Plan</SelectItem>
-                                                        <SelectItem value="2">Pro Plan</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="active_from">Active From</Label>
-                                                <Input
-                                                    id="active_from"
-                                                    type="date"
-                                                    value={data.active_from}
-                                                    onChange={(e) => setData('active_from', e.target.value)}
-                                                    className="bg-muted/20"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="active_to">Active To</Label>
-                                                <Input
-                                                    id="active_to"
-                                                    type="date"
-                                                    value={data.active_to}
-                                                    onChange={(e) => setData('active_to', e.target.value)}
-                                                    className="bg-muted/20"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="received_amount">Received Amount</Label>
-                                                <Input
-                                                    id="received_amount"
-                                                    type="number"
-                                                    value={data.received_amount}
-                                                    onChange={(e) => setData('received_amount', e.target.value)}
-                                                    className="bg-muted/20"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="number_of_branch">Number of Branch/Manager</Label>
-                                                <Input
-                                                    id="number_of_branch"
-                                                    type="number"
-                                                    value={data.number_of_branch}
-                                                    onChange={(e) => setData('number_of_branch', e.target.value)}
-                                                    placeholder="0"
-                                                    className="bg-muted/20"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </StepperContent>
-
-                                {/* Footer Navigation */}
-                                <div className="mt-10 flex items-center justify-between border-t pt-6">
+                                {/* Responsive Stepper Action Controls */}
+                                <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-6">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -589,15 +631,34 @@ export default function Create({ lookups, statusOptions }: any) {
                                     >
                                         <ChevronLeft className="size-4" /> Previous
                                     </Button>
-                                    {activeStep < 5 ? (
-                                        <Button type="button" size="lg" onClick={nextStep} className="gap-2 px-8">
-                                            Next <ChevronRight className="size-4" />
-                                        </Button>
-                                    ) : (
-                                        <Button type="submit" size="lg" disabled={processing} className="px-8 shadow-md">
-                                            {processing ? 'Submitting...' : 'Submit'}
-                                        </Button>
-                                    )}
+
+                                    <div className="flex items-center gap-3">
+                                        {/* Direct Submit button accessible right from Step 3 onwards */}
+                                        {activeStep >= 3 && (
+                                            <Button
+                                                type="submit"
+                                                size="lg"
+                                                disabled={processing}
+                                                className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md"
+                                            >
+                                                <Send className="size-4" />
+                                                {processing ? 'Creating Company...' : 'Submit & Create Company'}
+                                            </Button>
+                                        )}
+
+                                        {activeStep < 5 && (
+                                            <Button
+                                                type="button"
+                                                variant={activeStep >= 3 ? 'outline' : 'default'}
+                                                size="lg"
+                                                onClick={nextStep}
+                                                className="gap-2 px-6"
+                                            >
+                                                {activeStep === 3 ? 'More Details (Optional)' : 'Next'}
+                                                <ChevronRight className="size-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </form>
                         </StepperPanel>

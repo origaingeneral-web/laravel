@@ -20,6 +20,7 @@ class Feature extends Model
         'name',
         'description',
         'is_addon',
+        'price',
         'is_active',
         'sort_order',
     ];
@@ -31,6 +32,7 @@ class Feature extends Model
     {
         return [
             'is_addon' => 'boolean',
+            'price' => 'decimal:2',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];

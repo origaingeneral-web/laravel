@@ -132,3 +132,116 @@ test('super admin can bulk import states, cities, and areas', function (): void 
     $this->assertDatabaseHas('areas', ['area' => 'Import Area 1', 'city_id' => $cityId, 'zipcode' => '99001']);
     $this->assertDatabaseHas('areas', ['area' => 'Import Area 2', 'city_id' => $cityId, 'zipcode' => '99002']);
 });
+
+test('super admin can fetch products and create plan with multi-product per-user costs', function (): void {
+    Sanctum::actingAs($this->superAdmin, ['*']);
+
+    $prod1Id = DB::table('products')->insertGetId([
+        'name' => 'CRM Suite',
+        'code' => 'crm_suite',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $prod2Id = DB::table('products')->insertGetId([
+        'name' => 'Field Force',
+        'code' => 'field_force',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // 1. Fetch products list
+    $prodResponse = $this->getJson(route('api.v1.admin.master.products'));
+    $prodResponse->assertOk()
+        ->assertJsonStructure(['data']);
+
+    // 2. Create Plan with multiple products and product-wise limits
+    $createResponse = $this->postJson(route('api.v1.admin.master.plans.store'), [
+        'plan_name' => 'Enterprise Multi-Product Plan',
+        'duration_in_days' => 365,
+        'tracking_duration' => 24,
+        'remarks' => 'Full enterprise package',
+        'products' => [
+            ['product_id' => $prod1Id, 'price_per_user' => 25.50, 'staff_limit' => 30],
+            ['product_id' => $prod2Id, 'price_per_user' => 15.00, 'staff_limit' => 50],
+        ],
+    ]);
+
+    $createResponse->assertCreated()
+        ->assertJsonPath('data.plan_name', 'Enterprise Multi-Product Plan');
+
+    $planId = $createResponse->json('data.id');
+
+    $this->assertDatabaseHas('plans', [
+        'id' => $planId,
+        'plan_name' => 'Enterprise Multi-Product Plan',
+        'duration_in_days' => 365,
+        'tracking_duration' => 24,
+    ]);
+
+    $this->assertDatabaseHas('plan_products', [
+        'plan_id' => $planId,
+        'product_id' => $prod1Id,
+        'price_per_user' => 25.50,
+        'staff_limit' => 30,
+    ]);
+
+    $this->assertDatabaseHas('plan_products', [
+        'plan_id' => $planId,
+        'product_id' => $prod2Id,
+        'price_per_user' => 15.00,
+        'staff_limit' => 50,
+    ]);
+
+    // 3. Update Plan
+    $updateResponse = $this->putJson(route('api.v1.admin.master.plans.update', ['plan' => $planId]), [
+        'plan_name' => 'Enterprise Multi-Product Plan (Updated)',
+        'duration_in_days' => 180,
+        'tracking_duration' => 18,
+        'remarks' => 'Updated package',
+        'products' => [
+            ['product_id' => $prod1Id, 'price_per_user' => 30.00, 'staff_limit' => 100],
+        ],
+    ]);
+
+    $updateResponse->assertOk()
+        ->assertJsonPath('data.plan_name', 'Enterprise Multi-Product Plan (Updated)');
+
+    $this->assertDatabaseHas('plans', [
+        'id' => $planId,
+        'plan_name' => 'Enterprise Multi-Product Plan (Updated)',
+        'duration_in_days' => 180,
+        'tracking_duration' => 18,
+    ]);
+
+    // Validation: Tracking duration cannot exceed 24 hours
+    $invalidResponse = $this->putJson(route('api.v1.admin.master.plans.update', ['plan' => $planId]), [
+        'plan_name' => 'Invalid Plan',
+        'duration_in_days' => 30,
+        'staff_limit' => 10,
+        'tracking_duration' => 25, // Invalid > 24
+    ]);
+    $invalidResponse->assertUnprocessable()
+        ->assertJsonValidationErrors(['tracking_duration']);
+
+    $this->assertDatabaseHas('plan_products', [
+        'plan_id' => $planId,
+        'product_id' => $prod1Id,
+        'price_per_user' => 30.00,
+        'staff_limit' => 100,
+    ]);
+
+    $this->assertDatabaseMissing('plan_products', [
+        'plan_id' => $planId,
+        'product_id' => $prod2Id,
+    ]);
+
+    // 4. Delete Plan
+    $deleteResponse = $this->deleteJson(route('api.v1.admin.master.plans.destroy', ['plan' => $planId]));
+    $deleteResponse->assertOk();
+
+    $this->assertDatabaseMissing('plans', ['id' => $planId]);
+    $this->assertDatabaseMissing('plan_products', ['plan_id' => $planId]);
+});

@@ -33,6 +33,13 @@ class Product extends Model
         return $this->hasMany(Plan::class);
     }
 
+    public function multiPlans(): BelongsToMany
+    {
+        return $this->belongsToMany(Plan::class, 'plan_products')
+            ->withPivot(['price_per_user', 'staff_limit'])
+            ->withTimestamps();
+    }
+
     public function features(): HasMany
     {
         return $this->hasMany(Feature::class);

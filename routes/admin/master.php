@@ -25,6 +25,7 @@ Route::prefix('v1/admin')
             Route::apiResource('states', StateApiController::class);
             Route::apiResource('cities', CityApiController::class);
             Route::apiResource('areas', AreaApiController::class);
+            Route::get('products', [PlanApiController::class, 'products'])->name('products');
             Route::apiResource('plans', PlanApiController::class);
         });
     });

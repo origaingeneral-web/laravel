@@ -6,7 +6,6 @@ use App\Enums\CompanyStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class StoreCompanyRequest extends FormRequest
 {
@@ -26,8 +25,8 @@ class StoreCompanyRequest extends FormRequest
             'company_code' => ['nullable', 'string', 'size:4', 'unique:companies,company_code'],
             'email' => ['required', 'email', 'max:255', 'unique:companies,email'],
             'mobile' => ['required', 'string', 'max:20'],
-            'owner_name' => ['required', 'string', 'max:255'],
-            'owner_mobile' => ['required', 'string', 'max:20'],
+            'owner_name' => ['nullable', 'string', 'max:255'],
+            'owner_mobile' => ['nullable', 'string', 'max:20'],
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'state_id' => ['required', 'integer', 'exists:states,id'],
             'city_id' => ['required', 'integer', 'exists:cities,id'],
@@ -41,20 +40,16 @@ class StoreCompanyRequest extends FormRequest
                 CompanyStatus::Disabled->value,
             ])],
             'create_admin' => ['sometimes', 'boolean'],
-            'admin_name' => ['required_if:create_admin,true', 'nullable', 'string', 'max:255'],
+            'admin_name' => ['nullable', 'string', 'max:255'],
             'admin_email' => [
-                'required_if:create_admin,true',
                 'nullable',
                 'email',
                 'max:255',
                 'unique:users,email',
             ],
             'admin_password' => [
-                'required_if:create_admin,true',
                 'nullable',
                 'string',
-                Password::defaults(),
-                'confirmed',
             ],
             'document_type' => ['nullable', 'string', 'max:50'],
             'document_number' => ['nullable', 'string', 'max:100'],

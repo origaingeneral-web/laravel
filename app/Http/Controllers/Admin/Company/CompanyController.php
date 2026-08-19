@@ -104,6 +104,12 @@ class CompanyController extends Controller
             'admin_email',
             'admin_password',
             'admin_password_confirmation',
+            'main_branch',
+            'plan_id',
+            'active_from',
+            'active_to',
+            'received_amount',
+            'number_of_branch',
         ]);
 
         $data['company_code'] = strtoupper(
@@ -113,23 +119,49 @@ class CompanyController extends Controller
         $data['status'] = $data['status'] ?? CompanyStatus::Active->value;
         $data['terms_accepted'] = true;
         $data['terms_accepted_at'] = now();
+        $data['owner_name'] = ! empty($data['owner_name']) ? $data['owner_name'] : $data['company_name'];
+        $data['owner_mobile'] = ! empty($data['owner_mobile']) ? $data['owner_mobile'] : $data['mobile'];
 
         $company = DB::transaction(function () use ($request, $data) {
             $company = Company::query()->create($data);
 
-            if ($request->boolean('create_admin')) {
+            if ($request->boolean('create_admin') && $request->filled('admin_email')) {
+                $adminName = $request->filled('admin_name')
+                    ? $request->string('admin_name')->toString()
+                    : $data['company_name'].' Admin';
+
                 $admin = User::query()->create([
                     'company_id' => $company->id,
                     'user_prefix' => 'ADM'.strtoupper(Str::random(4)),
-                    'name' => $request->string('admin_name')->toString(),
+                    'name' => $adminName,
                     'email' => Str::lower($request->string('admin_email')->toString()),
-                    'password' => $request->string('admin_password')->toString(),
+                    'password' => $request->string('admin_password')->toString() ?: '123456',
                     'initial_role' => 'admin',
                     'is_active' => true,
                     'email_verified_at' => now(),
                 ]);
 
                 $admin->assignRole(RoleName::CompanyAdmin->value);
+            }
+
+            if ($request->filled('plan_id')) {
+                $plan = DB::table('plans')->where('id', $request->integer('plan_id'))->first();
+                if ($plan) {
+                    $productId = $plan->product_id ?? DB::table('products')->value('id') ?? 1;
+                    $startsAt = $request->filled('active_from') ? now()->parse($request->input('active_from')) : now();
+                    $expiresAt = $request->filled('active_to') ? now()->parse($request->input('active_to')) : (clone $startsAt)->addDays($plan->duration_in_days ?: 30);
+
+                    CompanyProduct::query()->create([
+                        'company_id' => $company->id,
+                        'product_id' => $productId,
+                        'plan_id' => $plan->id,
+                        'status' => 'active',
+                        'starts_at' => $startsAt,
+                        'expires_at' => $expiresAt,
+                        'staff_limit' => $request->filled('number_of_branch') ? $request->integer('number_of_branch') : $plan->staff_limit,
+                        'notes' => 'Initial plan allotment during company setup',
+                    ]);
+                }
             }
 
             return $company;
@@ -260,6 +292,10 @@ class CompanyController extends Controller
                 ->orderBy('city')
                 ->limit(500)
                 ->get(['id', 'state_id', 'city']),
+            'plans' => DB::table('plans')
+                ->where('is_active', true)
+                ->orderBy('plan_name')
+                ->get(['id', 'plan_name', 'price', 'duration_in_days', 'staff_limit']),
         ];
     }
 

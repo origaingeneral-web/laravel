@@ -87,52 +87,52 @@ class CompanyDemoSeeder extends Seeder
             ],
         );
 
-        $f2 = Product::query()->updateOrCreate(
-            ['code' => 'f2_super'],
+        $flash = Product::query()->updateOrCreate(
+            ['code' => 'flash_force'],
             [
-                'name' => 'F2 Super',
-                'description' => 'Primary field-force product',
+                'name' => 'Flash Force',
+                'description' => 'Primary field operations management',
                 'is_active' => true,
                 'sort_order' => 1,
             ],
         );
 
-        $another = Product::query()->updateOrCreate(
-            ['code' => 'another_app'],
+        $mega = Product::query()->updateOrCreate(
+            ['code' => 'mega_force'],
             [
-                'name' => 'Another App',
-                'description' => 'Secondary companion product',
+                'name' => 'Mega Force',
+                'description' => 'Secondary enterprise operations suite',
                 'is_active' => true,
                 'sort_order' => 2,
             ],
         );
 
-        $f2Plan = Plan::query()->updateOrCreate(
+        $flashPlan = Plan::query()->updateOrCreate(
             [
-                'product_id' => $f2->id,
-                'plan_name' => 'F2 Starter',
+                'product_id' => $flash->id,
+                'plan_name' => 'Flash Starter',
             ],
             [
-                'price' => 999,
+                'price' => 499,
                 'duration_in_days' => 365,
-                'staff_limit' => 25,
+                'staff_limit' => 20,
                 'tracking_duration' => 24,
-                'remarks' => 'Demo F2 plan',
+                'remarks' => 'Demo Flash Force plan',
                 'is_active' => true,
             ],
         );
 
-        $anotherPlan = Plan::query()->updateOrCreate(
+        $megaPlan = Plan::query()->updateOrCreate(
             [
-                'product_id' => $another->id,
-                'plan_name' => 'Another Pro',
+                'product_id' => $mega->id,
+                'plan_name' => 'Mega Pro',
             ],
             [
                 'price' => 1499,
-                'duration_in_days' => 180,
-                'staff_limit' => 10,
-                'tracking_duration' => 12,
-                'remarks' => 'Demo companion plan',
+                'duration_in_days' => 365,
+                'staff_limit' => 50,
+                'tracking_duration' => 24,
+                'remarks' => 'Demo Mega Force plan',
                 'is_active' => true,
             ],
         );
@@ -140,33 +140,33 @@ class CompanyDemoSeeder extends Seeder
         CompanyProduct::query()->updateOrCreate(
             [
                 'company_id' => $company->id,
-                'product_id' => $f2->id,
+                'product_id' => $flash->id,
             ],
             [
-                'plan_id' => $f2Plan->id,
+                'plan_id' => $flashPlan->id,
                 'status' => 'active',
                 'starts_at' => $now->copy()->subDay(),
                 'expires_at' => $now->copy()->addYear(),
-                'staff_limit' => $f2Plan->staff_limit,
+                'staff_limit' => $flashPlan->staff_limit,
             ],
         );
 
         CompanyProduct::query()->updateOrCreate(
             [
                 'company_id' => $company->id,
-                'product_id' => $another->id,
+                'product_id' => $mega->id,
             ],
             [
-                'plan_id' => $anotherPlan->id,
+                'plan_id' => $megaPlan->id,
                 'status' => 'active',
                 'starts_at' => $now->copy()->subDays(3),
                 'expires_at' => $now->copy()->addMonths(6),
-                'staff_limit' => $anotherPlan->staff_limit,
+                'staff_limit' => $megaPlan->staff_limit,
             ],
         );
 
         $crm = Feature::query()->updateOrCreate(
-            ['product_id' => $f2->id, 'code' => 'crm'],
+            ['product_id' => $flash->id, 'code' => 'crm'],
             [
                 'name' => 'CRM',
                 'description' => 'Core CRM module',
@@ -177,7 +177,7 @@ class CompanyDemoSeeder extends Seeder
         );
 
         $analytics = Feature::query()->updateOrCreate(
-            ['product_id' => $f2->id, 'code' => 'analytics'],
+            ['product_id' => $flash->id, 'code' => 'analytics'],
             [
                 'name' => 'Analytics',
                 'description' => 'Reporting and analytics',
@@ -188,7 +188,7 @@ class CompanyDemoSeeder extends Seeder
         );
 
         $aiAddon = Feature::query()->updateOrCreate(
-            ['product_id' => $f2->id, 'code' => 'ai_assistant'],
+            ['product_id' => $flash->id, 'code' => 'ai_assistant'],
             [
                 'name' => 'AI Assistant',
                 'description' => 'Optional AI addon',
@@ -199,7 +199,7 @@ class CompanyDemoSeeder extends Seeder
         );
 
         $inventory = Feature::query()->updateOrCreate(
-            ['product_id' => $another->id, 'code' => 'inventory'],
+            ['product_id' => $mega->id, 'code' => 'inventory'],
             [
                 'name' => 'Inventory',
                 'description' => 'Stock management',
@@ -210,7 +210,7 @@ class CompanyDemoSeeder extends Seeder
         );
 
         $recruitment = Feature::query()->updateOrCreate(
-            ['product_id' => $f2->id, 'code' => 'recruitment'],
+            ['product_id' => $flash->id, 'code' => 'recruitment'],
             [
                 'name' => 'Recruitment',
                 'description' => 'Job openings, candidates and interview workflows',
@@ -231,7 +231,10 @@ class CompanyDemoSeeder extends Seeder
         foreach ($featurePermissionsMap as $featId => $perms) {
             foreach ($perms as $permName) {
                 foreach (['web', 'super_admin'] as $guard) {
-                    Permission::findOrCreate($permName, $guard)->update(['feature_id' => $featId]);
+                    Permission::query()->updateOrCreate(
+                        ['name' => $permName, 'guard_name' => $guard],
+                        ['feature_id' => $featId]
+                    );
                 }
             }
         }
@@ -240,7 +243,7 @@ class CompanyDemoSeeder extends Seeder
             DB::table('company_product_feature')->updateOrInsert(
                 [
                     'company_id' => $company->id,
-                    'product_id' => $f2->id,
+                    'product_id' => $flash->id,
                     'feature_id' => $feature->id,
                 ],
                 [
@@ -256,7 +259,7 @@ class CompanyDemoSeeder extends Seeder
         DB::table('company_product_feature')->updateOrInsert(
             [
                 'company_id' => $company->id,
-                'product_id' => $f2->id,
+                'product_id' => $flash->id,
                 'feature_id' => $aiAddon->id,
             ],
             [
@@ -271,7 +274,7 @@ class CompanyDemoSeeder extends Seeder
         DB::table('company_product_feature')->updateOrInsert(
             [
                 'company_id' => $company->id,
-                'product_id' => $another->id,
+                'product_id' => $mega->id,
                 'feature_id' => $inventory->id,
             ],
             [
@@ -286,29 +289,29 @@ class CompanyDemoSeeder extends Seeder
         CompanyProductCredit::query()->updateOrCreate(
             [
                 'company_id' => $company->id,
-                'product_id' => $f2->id,
+                'product_id' => $flash->id,
             ],
             ['balance' => 500],
         );
 
         if (! CompanyProductCreditLog::query()
             ->where('company_id', $company->id)
-            ->where('product_id', $f2->id)
+            ->where('product_id', $flash->id)
             ->exists()) {
             CompanyProductCreditLog::query()->create([
                 'company_id' => $company->id,
-                'product_id' => $f2->id,
+                'product_id' => $flash->id,
                 'amount' => 500,
                 'type' => 'credit',
                 'balance_after' => 500,
-                'description' => 'Initial F2 Super credit allocation',
+                'description' => 'Initial Flash Force credit allocation',
             ]);
         }
 
         CompanyProductCredit::query()->updateOrCreate(
             [
                 'company_id' => $company->id,
-                'product_id' => $another->id,
+                'product_id' => $mega->id,
             ],
             ['balance' => 100],
         );
@@ -328,7 +331,7 @@ class CompanyDemoSeeder extends Seeder
         );
         $admin->syncRoles([RoleName::CompanyAdmin->value]);
 
-        foreach ([$f2->id, $another->id] as $productId) {
+        foreach ([$flash->id, $mega->id] as $productId) {
             UserProductAccess::query()->updateOrCreate(
                 [
                     'user_id' => $admin->id,
@@ -360,7 +363,7 @@ class CompanyDemoSeeder extends Seeder
         UserProductAccess::query()->updateOrCreate(
             [
                 'user_id' => $employee->id,
-                'product_id' => $f2->id,
+                'product_id' => $flash->id,
             ],
             [
                 'company_id' => $company->id,
