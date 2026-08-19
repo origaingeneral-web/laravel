@@ -29,7 +29,7 @@ return new class extends Migration
 
             // Login
             $table->string('company_code', 4)->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
 
             $table->integer('child_companies_limit')->default(0);
             $table->integer('child_companies_count')->default(0);

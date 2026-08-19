@@ -68,6 +68,7 @@ class UserFactory extends Factory
             'city_id' => $cityId,
             'pincode' => fake()->numerify('######'),
             'address' => fake()->address(),
+            'password' => static::$password ??= Hash::make('password'),
             'status' => 1,
             'terms_accepted' => true,
             'terms_accepted_at' => now(),

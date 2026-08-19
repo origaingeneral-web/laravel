@@ -82,6 +82,17 @@ return new class extends Migration
             $table->index(['product_id', 'is_active'], 'plans_product_active_idx');
         });
 
+        Schema::create('plan_products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('plan_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->decimal('price_per_user', 10, 2)->default(0.00);
+            $table->integer('staff_limit')->nullable();
+            $table->timestamps();
+
+            $table->unique(['plan_id', 'product_id']);
+        });
+
         Schema::create('features', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
@@ -89,6 +100,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->boolean('is_addon')->default(false);
+            $table->decimal('price', 10, 2)->default(0.00);
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
@@ -104,6 +116,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('features');
+        Schema::dropIfExists('plan_products');
         Schema::dropIfExists('plans');
         Schema::dropIfExists('products');
         Schema::dropIfExists('module_features');

@@ -204,6 +204,23 @@ class SuperAdminMasterSeeder extends Seeder
                     ['product_id' => $productId, 'plan_name' => $plan['plan_name']],
                     [...$planData, 'is_active' => true, 'created_at' => $now, 'updated_at' => $now],
                 );
+
+                $planId = DB::table('plans')
+                    ->where('product_id', $productId)
+                    ->where('plan_name', $plan['plan_name'])
+                    ->value('id');
+
+                if ($planId) {
+                    DB::table('plan_products')->updateOrInsert(
+                        ['plan_id' => $planId, 'product_id' => $productId],
+                        [
+                            'price_per_user' => $plan['price'] ?? 0.00,
+                            'staff_limit' => $plan['staff_limit'] ?? null,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ],
+                    );
+                }
             }
         }
     }

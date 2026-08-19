@@ -81,6 +81,7 @@ class CompanyDemoSeeder extends Seeder
                 'city_id' => $cityId,
                 'pincode' => '400001',
                 'address' => 'KeenThemes HQ, Tech Park',
+                'password' => bcrypt('password'),
                 'status' => CompanyStatus::Active->value,
                 'terms_accepted' => true,
                 'terms_accepted_at' => $now,

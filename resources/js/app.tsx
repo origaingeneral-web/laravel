@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
+import { ToastListener } from '@/components/ui/toast-listener';
 import * as HelmetAsync from 'react-helmet-async';
 const HelmetProvider =
     HelmetAsync.HelmetProvider || (HelmetAsync as any).default?.HelmetProvider;
@@ -44,6 +45,7 @@ createInertiaApp({
                             <TooltipsProvider>
                                 <QueryProvider>
                                     <Toaster />
+                                    <ToastListener />
                                     {app}
                                 </QueryProvider>
                             </TooltipsProvider>

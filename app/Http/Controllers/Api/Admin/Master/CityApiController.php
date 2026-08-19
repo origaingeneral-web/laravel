@@ -5,85 +5,88 @@ namespace App\Http\Controllers\Api\Admin\Master;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Master\City;
 use App\Models\Admin\Master\State;
+use App\Trait\TryCatchHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CityApiController extends Controller
 {
+    use TryCatchHandler;
+
     public function index(): JsonResponse
     {
-        $cities = City::query()
-            ->join('states', 'cities.state_id', '=', 'states.id')
-            ->select(['cities.*', 'states.state'])
-            ->orderBy('cities.city')
-            ->get();
+        return $this->tryCatch(function () {
+            $cities = City::query()
+                ->join('states', 'cities.state_id', '=', 'states.id')
+                ->select(['cities.*', 'states.state'])
+                ->orderBy('cities.city')
+                ->get();
 
-        return response()->json([
-            'data' => $cities,
-        ]);
+            return $this->success($cities);
+        }, 'Failed to fetch cities.', 'masters');
     }
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'state_id' => ['required', 'integer', 'exists:states,id'],
-            'city' => ['required', 'string', 'max:255'],
-            'is_top_city' => ['sometimes', 'boolean'],
-        ]);
+        return $this->tryCatch(function () use ($request) {
+            $validated = $request->validate([
+                'state_id' => ['required', 'integer', 'exists:states,id'],
+                'city' => ['required', 'string', 'max:255'],
+                'is_top_city' => ['sometimes', 'boolean'],
+            ]);
 
-        $city = City::query()->create($validated);
+            $city = City::query()->create($validated);
 
-        return response()->json([
-            'message' => 'City created successfully.',
-            'data' => $city,
-        ], 201);
+            return $this->success($city, 'City created successfully.', 201);
+        }, 'Failed to create city.', 'masters');
     }
 
     public function update(Request $request, City $city): JsonResponse
     {
-        $validated = $request->validate([
-            'state_id' => ['required', 'integer', 'exists:states,id'],
-            'city' => ['required', 'string', 'max:255'],
-            'is_top_city' => ['sometimes', 'boolean'],
-        ]);
+        return $this->tryCatch(function () use ($request, $city) {
+            $validated = $request->validate([
+                'state_id' => ['required', 'integer', 'exists:states,id'],
+                'city' => ['required', 'string', 'max:255'],
+                'is_top_city' => ['sometimes', 'boolean'],
+            ]);
 
-        $city->update($validated);
+            $city->update($validated);
 
-        return response()->json([
-            'message' => 'City updated successfully.',
-            'data' => $city,
-        ]);
+            return $this->success($city, 'City updated successfully.');
+        }, 'Failed to update city.', 'masters');
     }
 
     public function destroy(City $city): JsonResponse
     {
-        $city->delete();
+        return $this->tryCatch(function () use ($city) {
+            $city->delete();
 
-        return response()->json([
-            'message' => 'City deleted successfully.',
-        ]);
+            return $this->success(null, 'City deleted successfully.');
+        }, 'Failed to delete city.', 'masters');
     }
 
     public function import(Request $request): JsonResponse
     {
-        $request->validate([
-            'rows' => ['required', 'array'],
-        ]);
+        return $this->tryCatch(function () use ($request) {
+            $request->validate([
+                'rows' => ['required', 'array'],
+            ]);
 
-        foreach ($request->input('rows', []) as $row) {
-            $stateId = $row['state_id'] ?? null;
-            if (! $stateId && ! empty($row['state'])) {
-                $stateId = State::where('state', $row['state'])->value('id');
+            foreach ($request->input('rows', []) as $row) {
+                $stateId = $row['state_id'] ?? null;
+                if (! $stateId && ! empty($row['state'])) {
+                    $stateId = State::where('state', $row['state'])->value('id');
+                }
+
+                if ($stateId && ! empty($row['city'])) {
+                    City::updateOrCreate(
+                        ['city' => $row['city'], 'state_id' => $stateId],
+                        ['is_top_city' => $row['is_top_city'] ?? false]
+                    );
+                }
             }
 
-            if ($stateId && ! empty($row['city'])) {
-                City::updateOrCreate(
-                    ['city' => $row['city'], 'state_id' => $stateId],
-                    ['is_top_city' => $row['is_top_city'] ?? false]
-                );
-            }
-        }
-
-        return response()->json(['message' => 'Import successful.']);
+            return $this->success(null, 'Import successful.');
+        }, 'Failed to import cities.', 'masters');
     }
 }
