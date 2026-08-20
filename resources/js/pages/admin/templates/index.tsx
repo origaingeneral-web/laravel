@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function Index({ templates, filters }: any) {
+    const indexUrl = filters.channel ? `/admin/templates/${filters.channel}` : '/admin/templates';
+
     const handleSearch = (search: string) => {
-        router.get('/admin/templates', { search }, { preserveState: true, replace: true });
+        router.get(indexUrl, { search }, { preserveState: true, replace: true });
     };
 
     const deleteTemplate = (id: number) => {

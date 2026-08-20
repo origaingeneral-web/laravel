@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, LogOut, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { superAdminNavigation, webAdminNavigation } from '@/config/admin-navigation';
 import { logout } from '@/routes';
 import type { AdminNavGroup, AdminNavItem } from '@/config/admin-navigation';
@@ -16,8 +16,35 @@ type Props = {
 
 function isItemActive(item: AdminNavItem, currentUrl: string): boolean {
     const patterns = item.active ?? [item.href];
+    const currentPath = currentUrl.split(/[?#]/)[0];
 
-    return patterns.some((pattern) => currentUrl === pattern || currentUrl.startsWith(`${pattern}/`));
+    return patterns.some((pattern) => {
+        const patternPath = pattern.split(/[?#]/)[0];
+
+        return currentPath === patternPath || currentPath.startsWith(`${patternPath}/`);
+    });
+}
+
+function normalizeActiveUrl(url: string, intended?: unknown): string {
+    if (!url.startsWith('/admin/secret-access')) {
+        return url;
+    }
+
+    if (typeof intended !== 'string' || intended === '') {
+        return url;
+    }
+
+    if (intended.startsWith('http://') || intended.startsWith('https://')) {
+        try {
+            const parsedUrl = new URL(intended);
+
+            return `${parsedUrl.pathname}${parsedUrl.search}`;
+        } catch {
+            return url;
+        }
+    }
+
+    return intended;
 }
 
 function canShowItem(item: AdminNavItem, auth: Record<string, unknown>): boolean {
@@ -70,6 +97,12 @@ function NavItem({
     const hasChildren = Boolean(item.children?.length);
     const [expanded, setExpanded] = useState(active);
     const Icon = item.icon;
+
+    useEffect(() => {
+        if (active) {
+            setExpanded(true);
+        }
+    }, [active]);
 
     if (hasChildren) {
         return (
@@ -150,6 +183,7 @@ function NavItem({
 export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Props) {
     const { url, props } = usePage();
     const auth = props.auth as Auth;
+    const activeUrl = normalizeActiveUrl(url, props.intended);
 
     const dashboardUrl =
         auth.guard === 'super_admin'
@@ -219,7 +253,7 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                             </h2>
                             <div className="space-y-1">
                                 {group.items.map((item) => (
-                                    <NavItem key={item.href} item={item} currentUrl={url} onNavigate={onClose} collapsed={collapsed} />
+                                    <NavItem key={item.href} item={item} currentUrl={activeUrl} onNavigate={onClose} collapsed={collapsed} />
                                 ))}
                             </div>
                         </section>

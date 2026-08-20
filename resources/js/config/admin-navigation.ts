@@ -181,25 +181,25 @@ export const superAdminNavigation: AdminNavGroup[] = [
                 children: [
                     {
                         title: 'Email',
-                        href: '/admin/templates?type=email',
+                        href: '/admin/templates/email',
                         icon: Mail,
-                        active: ['/admin/templates?type=email'],
+                        active: ['/admin/templates/email'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
                     {
                         title: 'SMS',
-                        href: '/admin/templates?type=sms',
+                        href: '/admin/templates/sms',
                         icon: MessageSquare,
-                        active: ['/admin/templates?type=sms'],
+                        active: ['/admin/templates/sms'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
                     {
                         title: 'WhatsApp',
-                        href: '/admin/templates?type=whatsapp',
+                        href: '/admin/templates/whatsapp',
                         icon: Phone,
-                        active: ['/admin/templates?type=whatsapp'],
+                        active: ['/admin/templates/whatsapp'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
@@ -241,25 +241,25 @@ export const superAdminNavigation: AdminNavGroup[] = [
                 children: [
                     {
                         title: 'Email History',
-                        href: '/admin/communication/logs?type=email',
+                        href: '/admin/communication/logs/email',
                         icon: Mail,
-                        active: ['/admin/communication/logs?type=email'],
+                        active: ['/admin/communication/logs/email'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
                     {
                         title: 'SMS History',
-                        href: '/admin/communication/logs?type=sms',
+                        href: '/admin/communication/logs/sms',
                         icon: MessageSquare,
-                        active: ['/admin/communication/logs?type=sms'],
+                        active: ['/admin/communication/logs/sms'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
                     {
                         title: 'WhatsApp History',
-                        href: '/admin/communication/logs?type=whatsapp',
+                        href: '/admin/communication/logs/whatsapp',
                         icon: Phone,
-                        active: ['/admin/communication/logs?type=whatsapp'],
+                        active: ['/admin/communication/logs/whatsapp'],
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
@@ -405,4 +405,3 @@ export const webAdminNavigation: AdminNavGroup[] = [
 
 /** @deprecated Use superAdminNavigation / webAdminNavigation */
 export const adminNavigation = superAdminNavigation;
-

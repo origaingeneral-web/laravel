@@ -12,12 +12,37 @@ use Inertia\Response;
 
 class SecretAccessController extends Controller
 {
+    private function cleanIntended(?string $intended): string
+    {
+        $fallback = route('admin.settings.edit', 'email', false);
+
+        if ($intended === null || $intended === '') {
+            return $fallback;
+        }
+
+        if (str_starts_with($intended, 'http://') || str_starts_with($intended, 'https://')) {
+            $path = parse_url($intended, PHP_URL_PATH);
+            $query = parse_url($intended, PHP_URL_QUERY);
+            $intended = is_string($path) ? $path : '';
+
+            if (is_string($query) && $query !== '') {
+                $intended .= '?'.$query;
+            }
+        }
+
+        if (! str_starts_with($intended, '/admin/settings') && ! str_starts_with($intended, '/admin/system')) {
+            return $fallback;
+        }
+
+        return $intended;
+    }
+
     /**
      * Display the secret password verification challenge screen.
      */
     public function show(Request $request): Response|RedirectResponse
     {
-        $intended = $request->query('intended', route('admin.settings.edit', 'email'));
+        $intended = $this->cleanIntended($request->query('intended'));
 
         // If already verified in this session, go straight to the destination
         if ($request->session()->get('super_admin_secret_verified') === true) {
@@ -52,10 +77,7 @@ class SecretAccessController extends Controller
         $request->session()->put('super_admin_secret_verified', true);
         $request->session()->put('super_admin_secret_verified_at', now()->timestamp);
 
-        $intended = (string) $request->input('intended');
-        if ($intended === '' || ! str_contains($intended, '/admin/')) {
-            $intended = route('admin.settings.edit', 'email');
-        }
+        $intended = $this->cleanIntended($request->input('intended'));
 
         return redirect()->to($intended)->with('success', 'Security verification successful. Access granted.');
     }

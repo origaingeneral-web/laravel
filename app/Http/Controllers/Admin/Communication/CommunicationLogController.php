@@ -10,17 +10,16 @@ use Inertia\Response;
 
 class CommunicationLogController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, ?string $type = null): Response
     {
         $search = trim((string) $request->string('search'));
-        $type = $request->string('type');
+        $type = $type ?? $request->string('type')->toString();
         $status = $request->string('status');
         $perPage = min(max((int) $request->integer('per_page', 15), 1), 50);
 
         $logs = CommunicationLog::query()
-            ->with('company')
-            ->when($type->toString() !== '', function ($query) use ($type): void {
-                $query->where('type', $type);
+            ->when($type !== '', function ($query) use ($type): void {
+                $query->where('channel', $type);
             })
             ->when($status->toString() !== '', function ($query) use ($status): void {
                 $query->where('status', $status);
@@ -29,9 +28,7 @@ class CommunicationLogController extends Controller
                 $query->where(function ($q) use ($search): void {
                     $q->where('recipient', 'like', "%{$search}%")
                         ->orWhere('subject', 'like', "%{$search}%")
-                        ->orWhereHas('company', function ($companyQuery) use ($search): void {
-                            $companyQuery->where('company_name', 'like', "%{$search}%");
-                        });
+                        ->orWhere('template_purpose', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -42,7 +39,7 @@ class CommunicationLogController extends Controller
             'logs' => $logs,
             'filters' => [
                 'search' => $search,
-                'type' => $type->toString(),
+                'type' => $type,
                 'status' => $status->toString(),
             ],
         ]);

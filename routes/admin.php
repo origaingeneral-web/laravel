@@ -44,7 +44,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::resource('features', FeatureController::class);
         Route::resource('permissions', PermissionController::class);
+        Route::get('templates/{channel}', [NotificationTemplateController::class, 'index'])
+            ->whereIn('channel', ['email', 'sms', 'whatsapp'])
+            ->name('templates.channel');
         Route::resource('templates', NotificationTemplateController::class);
+        Route::get('communication/logs/{type}', [CommunicationLogController::class, 'index'])
+            ->whereIn('type', ['email', 'sms', 'whatsapp'])
+            ->name('communication.logs.type');
         Route::get('communication/logs', [CommunicationLogController::class, 'index'])->name('communication.logs');
         Route::get('communication/notifications/firebase', [NotificationController::class, 'indexFirebase'])->name('notifications.firebase.index');
         Route::get('communication/notifications/firebase/create', [NotificationController::class, 'createFirebase'])->name('notifications.firebase.create');
