@@ -60,7 +60,7 @@ export function Header() {
     return (
         <header
             className={cn(
-                'header fixed start-0 end-0 top-0 z-10 flex shrink-0 items-stretch border-b border-border bg-background pe-[var(--removed-body-scroll-bar-size,0px)]',
+                'header fixed start-0 end-0 top-0 z-10 flex shrink-0 items-stretch border-b border-border bg-card pe-[var(--removed-body-scroll-bar-size,0px)] shadow-2xs',
             )}
         >
             <Container className="flex items-stretch justify-between lg:gap-4">

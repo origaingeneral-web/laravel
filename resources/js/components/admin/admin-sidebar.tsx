@@ -80,7 +80,7 @@ function NavItem({
                         'flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition',
                         collapsed && 'justify-center px-2',
                         active
-                            ? 'bg-nexlink-primary/10 text-nexlink-primary dark:bg-white/10 dark:text-white'
+                            ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-semibold'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
                     )}
                     aria-expanded={expanded}
@@ -107,7 +107,7 @@ function NavItem({
                                     className={cn(
                                         'flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition',
                                         childActive
-                                            ? 'bg-nexlink-primary text-white shadow-sm'
+                                            ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
                                             : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white'
                                     )}
                                 >
@@ -134,7 +134,7 @@ function NavItem({
                 'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition',
                 collapsed && 'justify-center px-2',
                 active
-                    ? 'bg-nexlink-primary text-white shadow-sm shadow-nexlink-primary/25'
+                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
             )}
         >
@@ -189,7 +189,7 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                         className={cn('flex items-center gap-3', collapsed && 'justify-center')}
                         onClick={onClose}
                     >
-                        <span className="flex size-11 items-center justify-center rounded-2xl bg-nexlink-primary text-white shadow-lg shadow-nexlink-primary/25">
+                        <span className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
                             N
                         </span>
                         {!collapsed && (

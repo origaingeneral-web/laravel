@@ -77,7 +77,6 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'States', path: '/admin/master/states' },
       { title: 'Cities', path: '/admin/master/cities' },
       { title: 'Areas', path: '/admin/master/areas' },
-      { title: 'Plans', path: '/admin/master/plans' },
     ],
   },
   {

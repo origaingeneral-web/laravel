@@ -21,7 +21,7 @@ export function Sidebar() {
                 'sidebar shrink-0 flex-col items-stretch lg:fixed lg:top-0 lg:bottom-0 lg:z-20 lg:flex lg:border-e',
                 isDarkTheme
                     ? 'dark bg-[#111522] border-border/80 text-slate-200'
-                    : 'bg-background border-border text-foreground',
+                    : 'bg-card border-border text-foreground',
             )}
         >
             <SidebarHeader />

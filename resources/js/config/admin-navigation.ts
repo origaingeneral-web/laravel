@@ -148,14 +148,6 @@ export const superAdminNavigation: AdminNavGroup[] = [
                         guard: 'super_admin',
                         permission: 'admin.access',
                     },
-                    {
-                        title: 'Plans',
-                        href: '/admin/master/plans',
-                        icon: CreditCard,
-                        active: ['/admin/master/plans'],
-                        guard: 'super_admin',
-                        permission: 'admin.access',
-                    },
                 ],
             },
             {

@@ -31,7 +31,7 @@ function NavItem({ item, currentPath }: { item: AdminNavItem; currentPath: strin
                     className={cn(
                         'flex h-9 w-full items-center justify-between gap-2.5 rounded-lg px-3 text-sm font-medium transition-all duration-150',
                         active
-                            ? 'bg-blue-500/10 text-blue-600 font-semibold dark:bg-blue-500/20 dark:text-blue-400'
+                            ? 'bg-primary/10 text-primary font-semibold dark:bg-primary/20 dark:text-primary'
                             : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white',
                     )}
                 >
@@ -62,7 +62,7 @@ function NavItem({ item, currentPath }: { item: AdminNavItem; currentPath: strin
                                     className={cn(
                                         'flex h-8.5 w-full items-center gap-2.5 rounded-md px-3 text-xs font-medium transition-all duration-150',
                                         childActive
-                                            ? 'bg-blue-600 text-white font-semibold shadow-xs dark:bg-blue-600 dark:text-white'
+                                            ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
                                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white',
                                     )}
                                 >
@@ -86,7 +86,7 @@ function NavItem({ item, currentPath }: { item: AdminNavItem; currentPath: strin
             className={cn(
                 'flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium transition-all duration-150',
                 active
-                    ? 'bg-blue-600 text-white font-semibold shadow-xs dark:bg-blue-600 dark:text-white'
+                    ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white',
             )}
         >

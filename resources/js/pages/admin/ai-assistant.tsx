@@ -4,12 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import { AiIcon } from '@/components/ai-icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
     ArrowUp,
-    Zap,
-    Code,
     ChevronDown,
     Copy,
     Check,
@@ -17,8 +14,6 @@ import {
     ThumbsUp,
     Paperclip,
     Mic,
-    ShieldAlert,
-    Database
 } from 'lucide-react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 
@@ -31,48 +26,9 @@ interface Message {
     timestamp: string;
 }
 
-const DEFAULT_PROMPTS = [
-    {
-        icon: Database,
-        label: 'Analyze Master Data',
-        prompt: 'Summarize business category stats and plan distributions across all registered companies.',
-        category: 'Data Analytics',
-        gradient: 'from-blue-500/10 via-indigo-500/10 to-transparent',
-        border: 'hover:border-blue-500/40',
-        badgeColor: 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-    },
-    {
-        icon: Code,
-        label: 'Generate Artisan Command',
-        prompt: 'Write a PHP Artisan console command to auto-clear expired user cache and log activity.',
-        category: 'Development',
-        gradient: 'from-purple-500/10 via-pink-500/10 to-transparent',
-        border: 'hover:border-purple-500/40',
-        badgeColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
-    },
-    {
-        icon: ShieldAlert,
-        label: 'Security & Cache Audit',
-        prompt: 'Perform a full system cache check and scan active user sessions for anomalies.',
-        category: 'System Health',
-        gradient: 'from-amber-500/10 via-orange-500/10 to-transparent',
-        border: 'hover:border-amber-500/40',
-        badgeColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-    },
-    {
-        icon: Zap,
-        label: 'Optimize Performance',
-        prompt: 'Suggest database indexing and queue optimizations for master record lookups.',
-        category: 'Performance',
-        gradient: 'from-emerald-500/10 via-teal-500/10 to-transparent',
-        border: 'hover:border-emerald-500/40',
-        badgeColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-    }
-];
-
 const QUICK_PILLS = [
     '⚡ Clear Cache',
-    '📊 Show Plan Metrics',
+    '📊 Show System Metrics',
     '🛠️ Generate Export Script',
     '🔒 Security Audit'
 ];
@@ -126,7 +82,7 @@ use Illuminate\\Support\\Facades\\Cache;
 class SyncMasterCache extends Command
 {
     protected $signature = 'master:sync-cache';
-    protected $description = 'Syncs all business categories and plans into Redis cache';
+    protected $description = 'Syncs all business categories into Redis cache';
 
     public function handle()
     {
@@ -191,48 +147,20 @@ class SyncMasterCache extends Command
                     <div className="mx-auto max-w-4xl space-y-6 pb-32">
                         {/* Welcome Hero State */}
                         {messages.length === 0 && (
-                            <div className="py-8 space-y-8 animate-in fade-in duration-500">
-                                <div className="flex flex-col items-center text-center space-y-3">
-                                    <div className="relative flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 border border-primary/20 shadow-lg">
-                                        <AiIcon className="size-12" />
-                                        <span className="absolute -top-1 -right-1 flex size-3.5">
-                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-                                            <span className="relative inline-flex size-3.5 rounded-full bg-blue-500"></span>
-                                        </span>
-                                    </div>
-                                    <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                                        <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Rigel</span> will assist you on the panel
-                                    </h2>
-                                    <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
-                                        Your dedicated panel AI. Ask questions about database metrics, generate scripts, or perform system health checks.
-                                    </p>
+                            <div className="py-16 space-y-4 animate-in fade-in duration-500 flex flex-col items-center text-center">
+                                <div className="relative flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 p-4 border border-primary/20 shadow-lg">
+                                    <AiIcon className="size-12" />
+                                    <span className="absolute -top-1 -right-1 flex size-3.5">
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                                        <span className="relative inline-flex size-3.5 rounded-full bg-blue-500"></span>
+                                    </span>
                                 </div>
-
-                                {/* Action Cards */}
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    {DEFAULT_PROMPTS.map((prompt, i) => (
-                                        <Card
-                                            key={i}
-                                            onClick={() => handleSend(prompt.prompt)}
-                                            className={`group relative cursor-pointer overflow-hidden border border-border/60 bg-gradient-to-br ${prompt.gradient} p-4.5 transition-all duration-300 hover:shadow-md ${prompt.border}`}
-                                        >
-                                            <div className="flex items-start justify-between gap-3 mb-2.5">
-                                                <div className="flex size-10 items-center justify-center rounded-xl bg-background/80 shadow-xs border border-border/40 group-hover:scale-105 transition-transform">
-                                                    <prompt.icon className="size-5 text-primary" />
-                                                </div>
-                                                <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${prompt.badgeColor}`}>
-                                                    {prompt.category}
-                                                </span>
-                                            </div>
-                                            <h3 className="text-sm font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                                                {prompt.label}
-                                            </h3>
-                                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                                {prompt.prompt}
-                                            </p>
-                                        </Card>
-                                    ))}
-                                </div>
+                                <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                                    <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Rigel</span> will assist you on the panel
+                                </h2>
+                                <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
+                                    Your dedicated panel AI. Ask questions about database metrics, generate scripts, or perform system health checks.
+                                </p>
                             </div>
                         )}
 

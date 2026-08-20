@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\Admin\Master\BusinessCategoryApiController;
 use App\Http\Controllers\Api\Admin\Master\CityApiController;
 use App\Http\Controllers\Api\Admin\Master\CountryApiController;
 use App\Http\Controllers\Api\Admin\Master\LanguageApiController;
-use App\Http\Controllers\Api\Admin\Master\PlanApiController;
 use App\Http\Controllers\Api\Admin\Master\StateApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,8 +24,6 @@ Route::prefix('v1/admin')
             Route::apiResource('states', StateApiController::class);
             Route::apiResource('cities', CityApiController::class);
             Route::apiResource('areas', AreaApiController::class);
-            Route::get('products', [PlanApiController::class, 'products'])->name('products');
-            Route::apiResource('plans', PlanApiController::class);
         });
     });
 // });

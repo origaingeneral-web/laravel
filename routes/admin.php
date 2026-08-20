@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\Master\BusinessCategoryWebController;
 use App\Http\Controllers\Admin\Master\CityWebController;
 use App\Http\Controllers\Admin\Master\CountryWebController;
 use App\Http\Controllers\Admin\Master\LanguageWebController;
-use App\Http\Controllers\Admin\Master\PlanWebController;
 use App\Http\Controllers\Admin\Master\StateWebController;
 use App\Http\Controllers\Admin\Notification\NotificationController;
 use App\Http\Controllers\Admin\Payment\PaymentController;
@@ -84,7 +83,6 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('states', [StateWebController::class, 'index'])->name('states.index');
             Route::get('cities', [CityWebController::class, 'index'])->name('cities.index');
             Route::get('areas', [AreaWebController::class, 'index'])->name('areas.index');
-            Route::get('plans', [PlanWebController::class, 'index'])->name('plans.index');
         });
     });
 });
