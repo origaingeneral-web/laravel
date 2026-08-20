@@ -21,8 +21,13 @@ class EnsureSuperAdminSecretVerified
                 ], 403);
             }
 
+            $intended = '/'.$request->path();
+            if ($request->getQueryString()) {
+                $intended .= '?'.$request->getQueryString();
+            }
+
             return redirect()->route('admin.secret-access.show', [
-                'intended' => $request->fullUrl(),
+                'intended' => $intended,
             ]);
         }
 

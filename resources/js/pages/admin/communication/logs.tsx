@@ -1,15 +1,16 @@
-import { Link, Head, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Mail, MessageSquare, Phone, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
 import { DynamicTable } from '@/components/common/dynamic-table';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 
 export default function Logs({ logs, filters }: any) {
+    const indexUrl = filters.type ? `/admin/communication/logs/${filters.type}` : '/admin/communication/logs';
+
     const handleSearch = (search: string) => {
-        router.get('/admin/communication/logs', { search, type: filters.type }, { preserveState: true, replace: true });
+        router.get(indexUrl, { search }, { preserveState: true, replace: true });
     };
 
     let title = "Communication Logs";
@@ -20,11 +21,11 @@ export default function Logs({ logs, filters }: any) {
 
     const columns = [
         {
-            key: 'sent_at',
+            key: 'created_at',
             header: 'Date',
             cell: (item: any) => (
                 <span className="text-sm font-medium whitespace-nowrap">
-                    {item.sent_at ? new Date(item.sent_at).toLocaleString() : 'Pending'}
+                    {new Date(item.created_at).toLocaleString()}
                 </span>
             )
         },
@@ -34,7 +35,7 @@ export default function Logs({ logs, filters }: any) {
             cell: (item: any) => (
                 <div>
                     <div className="font-semibold">{item.recipient}</div>
-                    {item.company && <div className="text-xs text-muted-foreground">{item.company.company_name}</div>}
+                    {item.template_purpose && <div className="text-xs text-muted-foreground">{item.template_purpose}</div>}
                 </div>
             )
         },
@@ -52,8 +53,8 @@ export default function Logs({ logs, filters }: any) {
             key: 'status',
             header: 'Status',
             cell: (item: any) => {
-                if (item.status === 'success') {
-                    return <Badge variant="success" className="gap-1"><CheckCircle className="size-3" /> Success</Badge>;
+                if (item.status === 'success' || item.status === 'sent' || item.status === 'delivered') {
+                    return <Badge variant="success" className="gap-1"><CheckCircle className="size-3" /> {item.status}</Badge>;
                 } else if (item.status === 'failed') {
                     return (
                         <Popover>
@@ -63,7 +64,7 @@ export default function Logs({ logs, filters }: any) {
                             <PopoverContent className="w-80">
                                 <div className="space-y-2">
                                     <h4 className="font-medium text-sm text-destructive">Error Details</h4>
-                                    <p className="text-xs text-muted-foreground">{item.error_message || 'Unknown error occurred.'}</p>
+                                    <p className="text-xs text-muted-foreground">{item.error_details || 'Unknown error occurred.'}</p>
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -80,8 +81,8 @@ export default function Logs({ logs, filters }: any) {
             key: 'type',
             header: 'Type',
             cell: (item: any) => {
-                if (item.type === 'email') return <Badge variant="outline" className="gap-1"><Mail className="size-3"/> Email</Badge>;
-                if (item.type === 'sms') return <Badge variant="outline" className="gap-1"><MessageSquare className="size-3"/> SMS</Badge>;
+                if (item.channel === 'email') return <Badge variant="outline" className="gap-1"><Mail className="size-3"/> Email</Badge>;
+                if (item.channel === 'sms') return <Badge variant="outline" className="gap-1"><MessageSquare className="size-3"/> SMS</Badge>;
                 return <Badge variant="outline" className="gap-1"><Phone className="size-3"/> WhatsApp</Badge>;
             }
         });

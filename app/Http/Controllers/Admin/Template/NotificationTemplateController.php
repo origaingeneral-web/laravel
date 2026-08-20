@@ -12,15 +12,24 @@ use Inertia\Response;
 
 class NotificationTemplateController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, ?string $channel = null): Response
     {
         $search = trim((string) $request->string('search'));
         $perPage = min(max((int) $request->integer('per_page', 15), 1), 50);
+        $channelColumn = match ($channel) {
+            'email' => 'is_email_active',
+            'sms' => 'is_sms_active',
+            'whatsapp' => 'is_whatsapp_active',
+            default => null,
+        };
 
         $templates = NotificationTemplate::query()
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('purpose', 'like', "%{$search}%");
+            })
+            ->when($channelColumn !== null, function ($query) use ($channelColumn): void {
+                $query->where($channelColumn, true);
             })
             ->orderBy('name')
             ->paginate($perPage)
@@ -30,6 +39,7 @@ class NotificationTemplateController extends Controller
             'templates' => $templates,
             'filters' => [
                 'search' => $search,
+                'channel' => $channel,
             ],
         ]);
     }

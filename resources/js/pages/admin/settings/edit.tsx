@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Save,
     Mail,
@@ -198,7 +198,8 @@ export default function Edit({ group, settings }: any) {
         return { ...settings };
     };
 
-    const { data, setData, post, processing } = useForm(getDefaultData());
+    const defaultData = useMemo(() => getDefaultData(), [group, settings]);
+    const { data, setData, post, processing } = useForm(defaultData);
     const [isNavigating, setIsNavigating] = useState(false);
     const [visibleSecrets, setVisibleSecrets] = useState<Record<string, boolean>>({});
 
@@ -208,6 +209,13 @@ export default function Edit({ group, settings }: any) {
 
     const upiFileInputRef = useRef<HTMLInputElement>(null);
     const bankFileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        setData(defaultData);
+        setVisibleSecrets({});
+        setUpiPreview(settings?.upi_qr_image || settings?.upi_qr_code_url || null);
+        setBankPreview(settings?.bank_image || settings?.bank_image_url || null);
+    }, [defaultData, setData, settings]);
 
     const toggleSecret = (key: string) => {
         setVisibleSecrets((prev) => ({ ...prev, [key]: !prev[key] }));

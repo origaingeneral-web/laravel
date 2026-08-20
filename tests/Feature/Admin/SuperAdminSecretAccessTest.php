@@ -23,14 +23,14 @@ test('unverified super admin accessing settings is redirected to secret verifica
     $response = $this->actingAs($this->admin, 'super_admin')
         ->get('/admin/settings/email');
 
-    $response->assertRedirect('/admin/secret-access/verify?intended=http%3A%2F%2Flocalhost%2Fadmin%2Fsettings%2Femail');
+    $response->assertRedirect('/admin/secret-access/verify?intended=%2Fadmin%2Fsettings%2Femail');
 });
 
 test('unverified super admin accessing system is redirected to secret verification challenge', function (): void {
     $response = $this->actingAs($this->admin, 'super_admin')
         ->get('/admin/system/server');
 
-    $response->assertRedirect('/admin/secret-access/verify?intended=http%3A%2F%2Flocalhost%2Fadmin%2Fsystem%2Fserver');
+    $response->assertRedirect('/admin/secret-access/verify?intended=%2Fadmin%2Fsystem%2Fserver');
 });
 
 test('submitting wrong secret password fails', function (): void {
@@ -86,5 +86,16 @@ test('navigating to other pages automatically expires secret verification', func
     $response = $this->actingAs($this->admin, 'super_admin')
         ->get('/admin/settings/email');
 
-    $response->assertRedirect('/admin/secret-access/verify?intended=http%3A%2F%2Flocalhost%2Fadmin%2Fsettings%2Femail');
+    $response->assertRedirect('/admin/secret-access/verify?intended=%2Fadmin%2Fsettings%2Femail');
+});
+
+test('absolute intended urls are normalized to admin relative paths', function (): void {
+    $response = $this->actingAs($this->admin, 'super_admin')
+        ->get('/admin/secret-access/verify?intended=http%3A%2F%2F127.0.0.1%3A8000%2Fadmin%2Fsystem%2Fserver');
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/security/secret-access')
+            ->where('intended', '/admin/system/server')
+        );
 });

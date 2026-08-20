@@ -16,7 +16,7 @@ trait ApiResponse
         mixed $data = null,
         string $message = 'Success',
         int $status = 200,
-        bool $notification = true,
+        bool $notification = false,
         array $meta = []
     ): JsonResponse {
         // Support flexible order if ($message, $data) is passed
@@ -47,7 +47,7 @@ trait ApiResponse
         string $message = 'Something went wrong.',
         ?array $errors = null,
         int $status = 500,
-        bool $notification = true,
+        bool $notification = false,
         ?string $errorCode = null
     ): JsonResponse {
         $response = [

@@ -9,22 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CommunicationLog extends Model
 {
     protected $fillable = [
-        'company_id',
-        'type',
+        'channel',
         'recipient',
+        'template_purpose',
         'subject',
         'message',
         'status',
-        'error_message',
-        'sent_at',
+        'error_details',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'sent_at' => 'datetime',
-        ];
-    }
 
     /**
      * @return BelongsTo<Company, $this>
