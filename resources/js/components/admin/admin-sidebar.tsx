@@ -185,11 +185,6 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
     const auth = props.auth as Auth;
     const activeUrl = normalizeActiveUrl(url, props.intended);
 
-    const dashboardUrl =
-        auth.guard === 'super_admin'
-            ? '/admin/dashboard'
-            : '/dashboard';
-
     const navigation = auth.guard === 'super_admin' ? superAdminNavigation : webAdminNavigation;
 
     const groups = useMemo(
@@ -217,12 +212,7 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                 aria-label="Admin navigation"
             >
                 <div className="flex h-20 items-center justify-between px-5">
-                    <Link
-                        href={dashboardUrl}
-                        prefetch
-                        className={cn('flex items-center gap-3', collapsed && 'justify-center')}
-                        onClick={onClose}
-                    >
+                    <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
                         <span className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
                             N
                         </span>
@@ -232,7 +222,7 @@ export function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }: Pro
                                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">CRM Admin</span>
                             </span>
                         )}
-                    </Link>
+                    </div>
                     <div className="flex items-center gap-1">
                         <button
                             type="button"
